@@ -1,0 +1,1 @@
+export const baseUrl = "https://lumina-khaki-delta.vercel.app"
