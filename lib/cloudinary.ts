@@ -30,7 +30,7 @@ async function getBase64ImageUrl(
 
 export async function getPhotos(): Promise<PhotoProps[]> {
   "use cache"
-  cacheLife("days")
+  cacheLife({ revalidate: 900 })
   try {
     // Search for images in a specific folder (optional) or just all images
     // Adjust 'folder:my-gallery/*' to match your Cloudinary folder structure
