@@ -6,7 +6,7 @@ export async function generateStaticParams() {
   const photos = await getPhotos();
 
   if (!photos || photos.length === 0) {
-    return [];
+    return [{ id: "__placeholder__" }];
   }
 
   return photos.map((photo) => ({
