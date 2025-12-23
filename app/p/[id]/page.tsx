@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import { XIcon } from "lucide-react";
 import { getPhotos } from "@/lib/cloudinary";
+import Link from "next/link";
 
 export async function generateStaticParams() {
   const photos = await getPhotos();
@@ -26,17 +28,28 @@ export default async function PhotoPage({ params }: PageProps<"/p/[id]">) {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-black">
-      <div className="relative w-full max-w-5xl aspect-3/2 mx-auto p-4">
-        <Image
-          src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_1280/${currentPhoto.public_id}.${currentPhoto.format}`}
-          alt="Neal367 Photo"
-          fill
-          priority
-          className="object-contain"
-          blurDataURL={currentPhoto.blurDataUrl}
-          placeholder="blur"
-        />
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-black/95 backdrop-blur-sm">
+      <Link
+        href="/"
+        className="absolute top-5 left-5 z-50 p-2 rounded-full bg-zinc-800/80 md:p-3 text-white transition hover:cursor-pointer hover:bg-zinc-600/80"
+        aria-label="Back to gallery"
+      >
+        <XIcon className="w-6 h-6" />
+      </Link>
+
+      <div className="relative w-full h-screen flex items-center justify-center">
+        <div className="relative w-full max-w-5xl h-full max-h-[90vh]">
+          <Image
+            src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_1280/${currentPhoto.public_id}.${currentPhoto.format}`}
+            alt={`Photo ${currentPhoto.id}`}
+            fill
+            priority
+            className="object-contain"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1280px"
+            blurDataURL={currentPhoto.blurDataUrl}
+            placeholder="blur"
+          />
+        </div>
       </div>
     </div>
   );

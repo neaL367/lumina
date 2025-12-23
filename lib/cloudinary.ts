@@ -29,13 +29,17 @@ async function getBase64ImageUrl(
 }
 
 export async function getPhotos(): Promise<PhotoProps[]> {
-  "use cache"
-  cacheLife({ revalidate: 900 })
+  "use cache";
+  cacheLife({
+    stale: 3600,
+    revalidate: 900,
+    expire: 86400,
+  });
   try {
     // Search for images in a specific folder (optional) or just all images
     // Adjust 'folder:my-gallery/*' to match your Cloudinary folder structure
     const results = await cloudinary.search
-      .expression(`folder:${process.env.CLOUDINARY_FOLDER}/*`) 
+      .expression(`folder:${process.env.CLOUDINARY_FOLDER}/*`)
       .sort_by("public_id", "desc")
       .max_results(400)
       .execute();
@@ -51,7 +55,7 @@ export async function getPhotos(): Promise<PhotoProps[]> {
       );
 
       reducedResults.push({
-        id: i, 
+        id: i,
         height: result.height,
         width: result.width,
         public_id: result.public_id,

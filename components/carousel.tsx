@@ -9,6 +9,7 @@ import {
   useCallback,
   startTransition,
 } from "react";
+import { ChevronLeftIcon, ChevronRightIcon, ExternalLink, XIcon } from "lucide-react";
 import type { PhotoProps } from "@/utils/types";
 
 interface CarouselProps {
@@ -155,7 +156,7 @@ export default function Carousel({
 
         {currentIndex > 0 && (
           <button
-            className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-zinc-800/80 p-1.5 md:p-3 text-white transition hover:cursor-pointer hover:bg-black/80"
+            className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-zinc-800/80 p-1.5 md:p-3 text-white transition hover:cursor-pointer hover:bg-zinc-600/80"
             onClick={handlePrev}
             aria-label="Previous image"
           >
@@ -165,7 +166,7 @@ export default function Carousel({
 
         {currentIndex + 1 < photos.length && (
           <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-zinc-800/80 p-1.5 md:p-3 text-white transition hover:cursor-pointer hover:bg-black/80"
+            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-zinc-800/80 p-1.5 md:p-3 text-white transition hover:cursor-pointer hover:bg-zinc-600/80"
             onClick={handleNext}
             aria-label="Next image"
           >
@@ -182,17 +183,17 @@ export default function Carousel({
             )}
             target="_blank"
             rel="noreferrer"
-            className="rounded-full bg-zinc-800/80 p-2 text-white transition hover:bg-black/80"
+            className="rounded-full bg-zinc-800/80 p-2 text-white transition hover:bg-zinc-600/80"
             title="Open full size"
           >
-            <ArrowTopRightIcon />
+            <ExternalLink className="p-0.5" />
           </a>
           <button
             onClick={closeModal}
-            className="rounded-full bg-zinc-800/80 p-2 text-white transition hover:bg-black/80 hover:cursor-pointer"
+            className="rounded-full bg-zinc-800/80 p-2 text-white transition hover:bg-zinc-600/80 hover:cursor-pointer"
             aria-label="Close gallery"
           >
-            <XMarkIcon />
+            <XIcon />
           </button>
         </div>
       </div>
@@ -224,71 +225,3 @@ export default function Carousel({
   );
 }
 
-function ChevronLeftIcon() {
-  return (
-    <svg
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      className="w-6 h-6"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15.75 19.5L8.25 12l7.5-7.5"
-      />
-    </svg>
-  );
-}
-function ChevronRightIcon() {
-  return (
-    <svg
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      className="w-6 h-6"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M8.25 4.5l7.5 7.5-7.5 7.5"
-      />
-    </svg>
-  );
-}
-function XMarkIcon() {
-  return (
-    <svg
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      className="w-6 h-6"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M6 18L18 6M6 6l12 12"
-      />
-    </svg>
-  );
-}
-function ArrowTopRightIcon() {
-  return (
-    <svg
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      className="w-5 h-5"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-      />
-    </svg>
-  );
-}
