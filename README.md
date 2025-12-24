@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lumina
+
+Lumina is a **Next.js** application that demonstrates a modern image gallery with advanced routing patterns. It integrates **Cloudinary** for image management and uses **Next.js Parallel Routes and Interception** to implement high‑performance image modals, inspired by the `nextgram` example.
+
+## Demo
+
+👉 [https://lumina-khaki-delta.vercel.app](https://lumina-khaki-delta.vercel.app)
+
+## Deploy Your Own
+
+Deploy your own copy of Lumina to Vercel with one click:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FneaL367%2Flumina&env=NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,CLOUDINARY_API_KEY,CLOUDINARY_API_SECRET)
+
+## Features
+
+* **Next.js App Router** – Built with the latest Next.js features, including React Server Components and streaming.
+* **Advanced Routing** – Uses **Parallel Routes** and **Intercepting Routes** to display images in modals when navigating from the feed, while still supporting shareable, standalone URLs on refresh.
+* **Cloudinary Integration** – High‑performance image optimization and delivery.
+* **Tailwind CSS** – Utility‑first styling for rapid UI development.
+* **TypeScript** – Fully type‑safe codebase.
 
 ## Getting Started
 
-First, run the development server:
+Follow these steps to run the project locally.
+
+### 1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+git clone https://github.com/neaL367/lumina.git
+cd lumina
+```
+
+### 2. Install dependencies
+
+This project uses **bun** for package management (based on `bun.lock`), but you can use your preferred package manager.
+
+```bash
+bun install
+```
+
+### 3. Configure environment variables
+
+Add your Cloudinary credentials `.env.local`:
+
+```bash
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+CLOUDINARY_FOLDER=your_folder
+```
+
+### 4. Run the development server
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```txt
+app/          # App Router setup, including modal routing logic
+@modal        # Parallel route slot for intercepting routes (modals)
+components/   # Reusable UI components
+lib/          # Cloudinary configuration and helpers
+utils/        # Shared utility functions
+```
 
-## Learn More
+## References
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+* Parallel Routes & Modals: [https://nextjs.org/docs/app/building-your-application/routing/parallel-routes#modals](https://nextjs.org/docs/app/building-your-application/routing/parallel-routes#modals)
+* Image Gallery Starter: [https://github.com/vercel/next.js/tree/canary/examples/with-cloudinary](https://github.com/vercel/next.js/tree/canary/examples/with-cloudinary)
+* NextGram: [https://github.com/vercel/nextgram](https://github.com/vercel/nextgram)
