@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import Carousel from "@/components/carousel";
+import { Carousel } from "@/components/carousel";
 import { getPhotos } from "@/lib/cloudinary";
 
 export async function generateStaticParams() {

@@ -27,7 +27,7 @@ const getCloudinaryUrl = (publicId: string, format: string, width: number) => {
   return `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_${width}/${publicId}.${format}`;
 };
 
-export default function Carousel({
+export function Carousel({
   index,
   currentPhoto,
   photos,
