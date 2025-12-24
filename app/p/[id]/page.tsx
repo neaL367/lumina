@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
 import { getPhotos } from "@/lib/cloudinary";
+import { baseUrl } from "@/utils/constants";
 
 export async function generateStaticParams() {
   const photos = await getPhotos();
@@ -14,6 +15,47 @@ export async function generateStaticParams() {
   return photos.map((photo) => ({
     id: String(photo.id),
   }));
+}
+
+export async function generateMetadata({ params }: PageProps<"/p/[id]">) {
+  const { id } = await params;
+  const photoId = Number(id);
+
+  const photos = await getPhotos();
+  const currentPhoto = photos.find((img) => img.id === photoId);
+
+  if (!currentPhoto) {
+    return {
+      title: "Photo Not Found",
+    };
+  }
+
+  const imageUrl = `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720/${currentPhoto.public_id}.${currentPhoto.format}`;
+
+  return {
+    title: "Neal367's photos",
+    description: "a collection of my favorite memories.❣️",
+
+    openGraph: {
+      title: "Neal367's photos",
+      description: "a collection of my favorite memories.❣️",
+      url: `${baseUrl}/p/${photoId}`,
+      images: [
+        {
+          url: imageUrl,
+          width: 720,
+          alt: "Neal367's photos",
+        },
+      ],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: "Neal367's photos",
+      description: "a collection of my favorite memories.❣️",
+      images: [imageUrl],
+    },
+  };
 }
 
 export default async function PhotoPage({ params }: PageProps<"/p/[id]">) {
