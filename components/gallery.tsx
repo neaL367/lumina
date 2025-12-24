@@ -71,7 +71,7 @@ export function Gallery({ photos }: { photos: PhotoProps[] }) {
           </div>
           <div className="flex items-center gap-4 mt-4">
             <Link
-              href="https://github.com/yourusername"
+              href="https://github.com/neal367"
               target="_blank"
               rel="noopener noreferrer"
               className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
@@ -81,7 +81,7 @@ export function Gallery({ photos }: { photos: PhotoProps[] }) {
             </Link>
 
             <Link
-              href="https://twitter.com/yourusername"
+              href="https://twitter.com/NL367"
               target="_blank"
               rel="noopener noreferrer"
               className="text-zinc-600 hover:text-blue-400 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors"
