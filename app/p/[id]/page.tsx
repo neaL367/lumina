@@ -1,8 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
 import { getPhotos } from "@/lib/cloudinary";
-import Link from "next/link";
 
 export async function generateStaticParams() {
   const photos = await getPhotos();

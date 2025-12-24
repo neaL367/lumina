@@ -9,7 +9,12 @@ import {
   useCallback,
   startTransition,
 } from "react";
-import { ChevronLeftIcon, ChevronRightIcon, ExternalLink, XIcon } from "lucide-react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ExternalLink,
+  XIcon,
+} from "lucide-react";
 import type { PhotoProps } from "@/utils/types";
 
 interface CarouselProps {
@@ -59,17 +64,13 @@ export default function Carousel({
 
   const handleNext = useCallback(() => {
     if (currentIndex + 1 < photos.length) {
-      startTransition(() => {
-        changePhotoId(currentIndex + 1);
-      });
+      changePhotoId(currentIndex + 1);
     }
   }, [currentIndex, photos.length, changePhotoId]);
 
   const handlePrev = useCallback(() => {
     if (currentIndex > 0) {
-      startTransition(() => {
-        changePhotoId(currentIndex - 1);
-      });
+      changePhotoId(currentIndex - 1);
     }
   }, [currentIndex, changePhotoId]);
 
@@ -114,13 +115,6 @@ export default function Carousel({
 
   const currentImage = photos[currentIndex] || currentPhoto;
 
-  const thumbnailStartIndex = Math.max(0, currentIndex - 10);
-  const thumbnailEndIndex = Math.min(photos.length, currentIndex + 10);
-
-  const visibleThumbnails = photos
-    .slice(thumbnailStartIndex, thumbnailEndIndex)
-    .map((photo, i) => ({ ...photo, originalIndex: thumbnailStartIndex + i }));
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/50 backdrop-blur-lg">
       <div
@@ -136,7 +130,6 @@ export default function Carousel({
       >
         <div className="relative h-full w-full flex items-center justify-center">
           <Image
-            key={currentImage.id}
             src={getCloudinaryUrl(
               currentImage.public_id,
               currentImage.format,
@@ -198,30 +191,39 @@ export default function Carousel({
         </div>
       </div>
 
-      <div className="fixed bottom-5 left-0 right-0 z-20 flex h-14 justify-center overflow-hidden bg-gradient-to-t from-black/80 to-transparent pt-2">
-        <div className="flex gap-2 overflow-x-auto px-4 overflow-hidden">
-          {visibleThumbnails.map((img) => (
-            <button
-              key={img.id}
-              onClick={() => changePhotoId(img.originalIndex)}
-              className={`relative h-12 w-20 shrink-0 overflow-hidden rounded-sm transition-all ${
-                img.id === currentImage.id
-                  ? " scale-110 z-10 brightness-110 rounded-sm"
-                  : "brightness-50 hover:brightness-75"
-              }`}
-              aria-label={`View photo ${img.id}`}
-            >
-              <Image
-                src={getCloudinaryUrl(img.public_id, img.format, 100)}
-                alt="thumbnail"
-                fill
-                className="object-cover"
-              />
-            </button>
-          ))}
+      <div className="fixed inset-x-0 bottom-0 z-40 overflow-hidden pt-6 pb-4">
+        <div className="relative h-14 w-full">
+          <div
+            className="absolute left-1/2 flex gap-2 will-change-transform"
+            style={{
+              transform: `translateX(calc(-${
+                currentIndex * (80 + 16) + 40
+              }px))`,
+            }}
+          >
+            {photos.map((photo, i) => (
+              <button
+                key={photo.id}
+                onClick={() => changePhotoId(i)}
+                className={`relative aspect-3/2 h-12 w-20 shrink-0 overflow-hidden rounded-sm ${
+                  i === currentIndex
+                    ? "z-10 scale-125 brightness-110 "
+                    : "brightness-50 contrast-125 hover:brightness-75"
+                }`}
+                aria-label={`View photo ${photo.id}`}
+              >
+                <Image
+                  src={getCloudinaryUrl(photo.public_id, photo.format, 100)}
+                  alt="thumbnail"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { useRef, useState, ViewTransition } from "react";
+import { useRef, useState } from "react";
 import { Github, Twitter } from "lucide-react";
 
 import { useXScroll } from "@/hooks/use-x-scroll";
@@ -14,40 +14,35 @@ function PhotoCard({ photos }: { photos: PhotoProps }) {
   const pathname = usePathname();
 
   const isActive = pathname === `/p/${photos.id}`;
-  const isPhotoModalOpen = pathname.startsWith("/p/");
 
-  const content = (
-    <div className="relative w-full h-full overflow-hidden rounded-lg bg-white dark:bg-zinc-900 shadow-sm ">
-      <Image
-        alt="Neal367's photo"
-        className={`object-cover object-center transition-all duration-500 ease-in-out hover:scale-[101.5%] hover:brightness-100 will-change-scroll
-          ${
-            isLoading
-              ? "scale-105 blur-lg grayscale"
-              : "scale-100 blur-0 grayscale-0"
-          }
-        `}
-        style={{ transform: "translate3d(0, 0, 0)" }}
-        placeholder="blur"
-        blurDataURL={photos.blurDataUrl}
-        src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720/${photos.public_id}.${photos.format}`}
-        width={720}
-        height={480}
-        onLoad={() => setIsLoading(false)}
-        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, (max-width: 1536px) 33vw, 25vw"
-      />
+  return (
+    <div
+      className={`h-full w-full transition-opacity duration-500 ${
+        isActive ? "opacity-0" : "opacity-100"
+      }`}
+    >
+      <div className="relative w-full h-full overflow-hidden rounded-lg bg-white dark:bg-zinc-900 shadow-sm ">
+        <Image
+          alt="Neal367's photo"
+          className={`object-cover object-center transition-all duration-500 ease-in-out hover:scale-[101.5%] hover:brightness-100 will-change-scroll
+            ${
+              isLoading
+                ? "scale-105 blur-lg grayscale"
+                : "scale-100 blur-0 grayscale-0"
+            }
+          `}
+          style={{ transform: "translate3d(0, 0, 0)" }}
+          placeholder="blur"
+          blurDataURL={photos.blurDataUrl}
+          src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720/${photos.public_id}.${photos.format}`}
+          width={720}
+          height={480}
+          onLoad={() => setIsLoading(false)}
+          sizes="(max-width: 768px) 100vw, 33vw"
+        />
+      </div>
     </div>
   );
-
-  if (isActive) {
-    return <div className="contents opacity-0">{content}</div>;
-  }
-
-  if (isPhotoModalOpen) {
-    return <div className="contents">{content}</div>;
-  }
-
-  return <ViewTransition name={`photo-${photos.id}`}>{content}</ViewTransition>;
 }
 
 export function Gallery({ photos }: { photos: PhotoProps[] }) {
@@ -101,7 +96,7 @@ export function Gallery({ photos }: { photos: PhotoProps[] }) {
           <Link
             key={photo.id}
             href={`/p/${photo.id}`}
-            className="h-40 sm:h-48 lg:h-52 block cursor-zoom-in active:scale-95 transition-all"
+            className="h-40 sm:h-48 lg:h-52 block cursor-zoom-in active:scale-[0.98] transition-all"
             scroll={false}
           >
             <PhotoCard photos={photo} />
