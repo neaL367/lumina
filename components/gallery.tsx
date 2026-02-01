@@ -9,32 +9,32 @@ import { Github, Twitter } from "lucide-react";
 import { useXScroll } from "@/hooks/use-x-scroll";
 import type { PhotoProps } from "@/utils/types";
 
-function PhotoCard({ photos }: { photos: PhotoProps }) {
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+function PhotoCard({ photo }: { photo: PhotoProps }) {
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
 
-  const isActive = pathname === `/p/${photos.id}`;
+  const isActive = pathname === `/p/${photo.id}`;
 
   return (
     <div
-      className={`h-full w-full transition-opacity duration-500 ${
-        isActive ? "opacity-0" : "opacity-100"
-      }`}
+      className={`h-full w-full transition-opacity duration-500 ${isActive ? "opacity-0" : "opacity-100"
+        }`}
     >
       <div className="relative w-full h-full overflow-hidden rounded-lg bg-white dark:bg-zinc-900 shadow-sm ">
         <Image
           alt="Neal367's photo"
           className={`object-cover object-center transition-all duration-500 ease-in-out hover:scale-[101.5%] hover:brightness-100 will-change-scroll
-            ${
-              isLoading
-                ? "scale-105 blur-lg grayscale"
-                : "scale-100 blur-0 grayscale-0"
+            ${isLoading
+              ? "scale-105 blur-lg grayscale"
+              : "scale-100 blur-0 grayscale-0"
             }
           `}
           style={{ transform: "translate3d(0, 0, 0)" }}
           placeholder="blur"
-          blurDataURL={photos.blurDataUrl}
-          src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720/${photos.public_id}.${photos.format}`}
+          blurDataURL={photo.blurDataUrl}
+          src={`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_720/${photo.public_id}.${photo.format}`}
           width={720}
           height={480}
           onLoad={() => setIsLoading(false)}
@@ -99,7 +99,7 @@ export function Gallery({ photos }: { photos: PhotoProps[] }) {
             className="h-40 sm:h-48 lg:h-52 block cursor-zoom-in active:scale-[0.98] transition-all"
             scroll={false}
           >
-            <PhotoCard photos={photo} />
+            <PhotoCard photo={photo} />
           </Link>
         ))}
       </div>

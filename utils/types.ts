@@ -1,7 +1,7 @@
 export interface PhotoProps {
-  id: number;
-  height: string;
-  width: string;
+  id: string;
+  height: number;
+  width: number;
   public_id: string;
   format: string;
   blurDataUrl?: string;

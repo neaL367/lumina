@@ -2,15 +2,18 @@ import { Suspense } from "react";
 
 import { GallerySkeleton } from "@/components/gallery-skeleton";
 import { Gallery } from "@/components/gallery";
-import { getPhotos } from "@/lib/cloudinary";
+import { getPhotos } from "@/lib/photos";
 
-export default async function Home() {
+async function GalleryContent() {
   const photos = await getPhotos();
+  return <Gallery photos={photos} />;
+}
 
+export default function Home() {
   return (
     <main className="w-full h-dvh bg-zinc-50 dark:bg-black">
       <Suspense fallback={<GallerySkeleton />}>
-        <Gallery photos={photos} />
+        <GalleryContent />
       </Suspense>
     </main>
   );

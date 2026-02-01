@@ -23,8 +23,10 @@ interface CarouselProps {
   photos: PhotoProps[];
 }
 
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
 const getCloudinaryUrl = (publicId: string, format: string, width: number) => {
-  return `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_${width}/${publicId}.${format}`;
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_${width}/${publicId}.${format}`;
 };
 
 export function Carousel({
@@ -141,9 +143,8 @@ export function Carousel({
             sizes="(max-width: 768px) 100vw, 33vw"
             alt={`Photo ${currentImage.id}`}
             onLoad={() => setLoading(false)}
-            className={`max-h-full max-w-full object-contain transition-opacity duration-500 ${
-              loading ? "opacity-0" : "opacity-100"
-            }`}
+            className={`max-h-full max-w-full object-contain transition-opacity duration-500 ${loading ? "opacity-0" : "opacity-100"
+              }`}
           />
         </div>
 
@@ -196,20 +197,18 @@ export function Carousel({
           <div
             className="absolute left-1/2 flex gap-2 will-change-transform"
             style={{
-              transform: `translateX(calc(-${
-                currentIndex * (80 + 16) + 40
-              }px))`,
+              transform: `translateX(calc(-${currentIndex * (80 + 16) + 40
+                }px))`,
             }}
           >
             {photos.map((photo, i) => (
               <button
                 key={photo.id}
                 onClick={() => changePhotoId(i)}
-                className={`relative aspect-3/2 h-12 w-20 shrink-0 overflow-hidden rounded-sm ${
-                  i === currentIndex
-                    ? "z-10 scale-125 brightness-110 "
-                    : "brightness-50 contrast-125 hover:brightness-75"
-                }`}
+                className={`relative aspect-3/2 h-12 w-20 shrink-0 overflow-hidden rounded-sm ${i === currentIndex
+                  ? "z-10 scale-125 brightness-110 "
+                  : "brightness-50 contrast-125 hover:brightness-75"
+                  }`}
                 aria-label={`View photo ${photo.id}`}
               >
                 <Image

@@ -3,8 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
-  reactCompiler: true,
   typedRoutes: true,
+  experimental: {
+    inlineCss: true,
+    optimizePackageImports: ["lucide-react"],
+  },
   images: {
     remotePatterns: [
       {
@@ -12,10 +15,6 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
       },
     ],
-  },
-  typescript: {
-    ignoreBuildErrors: false,
-    tsconfigPath: "tsconfig.json",
   },
 };
 
