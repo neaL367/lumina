@@ -34,11 +34,11 @@ function PhotoCard({ photo }: { photo: PhotoProps }) {
           style={{ transform: "translate3d(0, 0, 0)" }}
           placeholder="blur"
           blurDataURL={photo.blurDataUrl}
-          src={`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_720/${photo.public_id}.${photo.format}`}
-          width={720}
-          height={480}
+          src={`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_400,q_auto,f_auto/${photo.public_id}.${photo.format}`}
+          width={400}
+          height={267}
           onLoad={() => setIsLoading(false)}
-          sizes="(max-width: 768px) 100vw, 33vw"
+          sizes="280px"
         />
       </div>
     </div>
