@@ -26,7 +26,7 @@ interface CarouselProps {
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 const getCloudinaryUrl = (publicId: string, format: string, width: number) => {
-  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_${width}/${publicId}.${format}`;
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_${width},q_auto,f_auto/${publicId}.${format}`;
 };
 
 export function Carousel({
@@ -140,10 +140,12 @@ export function Carousel({
             width={1280}
             height={853}
             priority
-            sizes="(max-width: 768px) 100vw, 33vw"
+            placeholder="blur"
+            blurDataURL={currentImage.blurDataUrl}
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 90vw, 1280px"
             alt={`Photo ${currentImage.id}`}
             onLoad={() => setLoading(false)}
-            className={`max-h-full max-w-full object-contain transition-opacity duration-500 ${loading ? "opacity-0" : "opacity-100"
+            className={`max-h-full max-w-full object-contain transition-all duration-700 ease-in-out ${loading ? "blur-xl scale-[1.02]" : "blur-0 scale-100"
               }`}
           />
         </div>
@@ -212,11 +214,13 @@ export function Carousel({
                 aria-label={`View photo ${photo.id}`}
               >
                 <Image
-                  src={getCloudinaryUrl(photo.public_id, photo.format, 100)}
+                  src={getCloudinaryUrl(photo.public_id, photo.format, 160)}
                   alt="thumbnail"
                   fill
+                  placeholder="blur"
+                  blurDataURL={photo.blurDataUrl}
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 33vw"
+                  sizes="80px"
                 />
               </button>
             ))}

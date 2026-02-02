@@ -27,7 +27,7 @@ async function getBase64ImageUrl(
 }
 
 
-export async function getPhotos(): Promise<PhotoProps[]> {
+export async function getPhotos(withBlur = true): Promise<PhotoProps[]> {
     "use cache";
     cacheLife({
         stale: 3600,
@@ -41,10 +41,13 @@ export async function getPhotos(): Promise<PhotoProps[]> {
             .max_results(400)
             .execute();
 
-        const blurImagePromises = results.resources.map((result: CloudinaryResource) => {
-            return getBase64ImageUrl(result.public_id, result.format);
-        });
-        const imagesWithBlurData = await Promise.all(blurImagePromises);
+        let imagesWithBlurData: (string | undefined)[] = [];
+        if (withBlur) {
+            const blurImagePromises = results.resources.map((result: CloudinaryResource) => {
+                return getBase64ImageUrl(result.public_id, result.format);
+            });
+            imagesWithBlurData = await Promise.all(blurImagePromises);
+        }
 
         const reducedResults: PhotoProps[] = [];
         for (let i = 0; i < results.resources.length; i++) {
@@ -55,7 +58,7 @@ export async function getPhotos(): Promise<PhotoProps[]> {
                 width: result.width,
                 public_id: result.public_id,
                 format: result.format,
-                blurDataUrl: imagesWithBlurData[i],
+                blurDataUrl: withBlur ? imagesWithBlurData[i] : undefined,
             });
         }
 
@@ -63,6 +66,31 @@ export async function getPhotos(): Promise<PhotoProps[]> {
     } catch (error) {
         console.error("Error fetching photos from Cloudinary:", error);
         return [];
+    }
+}
+
+export async function getPhotoById(id: string): Promise<PhotoProps | null> {
+    "use cache";
+    cacheLife({
+        stale: 3600,
+        revalidate: 900,
+        expire: 86400,
+    });
+    try {
+        const result = await cloudinary.api.resource(id);
+        const blurDataUrl = await getBase64ImageUrl(result.public_id, result.format);
+
+        return {
+            id: result.public_id,
+            height: result.height,
+            width: result.width,
+            public_id: result.public_id,
+            format: result.format,
+            blurDataUrl,
+        };
+    } catch (error) {
+        console.error(`Error fetching photo ${id} from Cloudinary:`, error);
+        return null;
     }
 }
 

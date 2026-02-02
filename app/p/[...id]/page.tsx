@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
-import { getPhotos, getPhotoIds } from "@/lib/photos";
+import { getPhotoById, getPhotoIds } from "@/lib/photos";
 import { baseUrl } from "@/utils/constants";
 
 export async function generateStaticParams() {
@@ -21,8 +21,7 @@ export async function generateMetadata(props: PageProps<"/p/[...id]">) {
     const { id } = await props.params;
     const photoId = Array.isArray(id) ? id.join("/") : id;
 
-    const photos = await getPhotos();
-    const currentPhoto = photos.find((img) => img.id === photoId);
+    const currentPhoto = await getPhotoById(photoId);
 
     if (!currentPhoto) {
         return {
@@ -62,8 +61,7 @@ export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
     const { id } = await props.params;
     const photoId = Array.isArray(id) ? id.join("/") : id;
 
-    const photos = await getPhotos();
-    const currentPhoto = photos.find((img) => img.id === photoId);
+    const currentPhoto = await getPhotoById(photoId);
 
     if (!currentPhoto) {
         return notFound();

@@ -19,7 +19,7 @@ export default async function PhotoModal(props: PageProps<"/p/[...id]">) {
     const photoId = Array.isArray(id) ? id.join("/") : id;
 
     const photos = await getPhotos();
-    const currentPhoto = photos.find((img) => img.id === photoId);
+    const currentPhoto = photos.find((p) => p.id === photoId);
 
     if (!currentPhoto) return notFound();
 
