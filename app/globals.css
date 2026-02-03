@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@view-transition {
+  navigation: auto;
+}
+
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -25,4 +30,3 @@ body {
   scrollbar-gutter: stable both-edges;
   scroll-behavior: smooth;
 }
-

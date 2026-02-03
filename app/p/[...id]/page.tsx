@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { XIcon } from "lucide-react";
 import { getPhotoById, getPhotoIds } from "@/lib/photos";
 import { baseUrl } from "@/utils/constants";
+import { ProgressiveViewer } from "@/components/progressive-viewer";
 
 export async function generateStaticParams() {
     const photoIds = await getPhotoIds();
@@ -79,16 +79,7 @@ export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
 
             <div className="relative w-full h-screen flex items-center justify-center">
                 <div className="relative w-full max-w-5xl h-full max-h-[90vh]">
-                    <Image
-                        src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_1280/${currentPhoto.public_id}.${currentPhoto.format}`}
-                        alt={`Photo ${currentPhoto.id}`}
-                        fill
-                        priority
-                        className="object-contain"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1280px"
-                        blurDataURL={currentPhoto.blurDataUrl}
-                        placeholder="blur"
-                    />
+                    <ProgressiveViewer photo={currentPhoto} />
                 </div>
             </div>
         </div>

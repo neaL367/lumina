@@ -6,3 +6,14 @@ export interface PhotoProps {
   format: string;
   blurDataUrl?: string;
 }
+
+export type CarouselContextType = {
+  currentIndex: number;
+  photos: PhotoProps[];
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+  handleNext: () => void;
+  handlePrev: () => void;
+  closeModal: () => void;
+  goToIndex: (index: number) => void;
+}

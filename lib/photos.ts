@@ -13,15 +13,26 @@ async function getBase64ImageUrl(
     imageId: string,
     format: string
 ): Promise<string | undefined> {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    if (!cloudName) {
+        console.error("Cloudinary cloud name is not defined in env.");
+        return undefined;
+    }
+
     try {
         const response = await fetch(
-            `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/w_40,e_blur:400,q_auto,f_webp/${imageId}.${format}`
+            `https://res.cloudinary.com/${cloudName}/image/upload/w_100,e_blur:1000,q_auto,f_webp/${imageId}.${format}`
         );
+
+        if (!response.ok) {
+            throw new Error(`Cloudinary fetch failed: ${response.status} ${response.statusText}`);
+        }
+
         const buffer = await response.arrayBuffer();
         const base64 = Buffer.from(buffer).toString("base64");
         return `data:image/webp;base64,${base64}`;
     } catch (e) {
-        console.error("Error generating blur data:", e);
+        console.error(`Error generating blur data for ${imageId}:`, e);
         return undefined;
     }
 }
@@ -34,6 +45,7 @@ export async function getPhotos(withBlur = true): Promise<PhotoProps[]> {
         revalidate: 900,
         expire: 86400,
     });
+
     try {
         const results = await cloudinary.search
             .expression(`folder:${process.env.CLOUDINARY_FOLDER}/*`)
@@ -49,20 +61,14 @@ export async function getPhotos(withBlur = true): Promise<PhotoProps[]> {
             imagesWithBlurData = await Promise.all(blurImagePromises);
         }
 
-        const reducedResults: PhotoProps[] = [];
-        for (let i = 0; i < results.resources.length; i++) {
-            const result = results.resources[i];
-            reducedResults.push({
-                id: result.public_id,
-                height: result.height,
-                width: result.width,
-                public_id: result.public_id,
-                format: result.format,
-                blurDataUrl: withBlur ? imagesWithBlurData[i] : undefined,
-            });
-        }
-
-        return reducedResults;
+        return results.resources.map((result: CloudinaryResource, i: number) => ({
+            id: result.public_id,
+            height: result.height,
+            width: result.width,
+            public_id: result.public_id,
+            format: result.format,
+            blurDataUrl: withBlur ? imagesWithBlurData[i] : undefined,
+        }));
     } catch (error) {
         console.error("Error fetching photos from Cloudinary:", error);
         return [];
@@ -76,6 +82,8 @@ export async function getPhotoById(id: string): Promise<PhotoProps | null> {
         revalidate: 900,
         expire: 86400,
     });
+
+
     try {
         const result = await cloudinary.api.resource(id);
         const blurDataUrl = await getBase64ImageUrl(result.public_id, result.format);
@@ -94,10 +102,6 @@ export async function getPhotoById(id: string): Promise<PhotoProps | null> {
     }
 }
 
-/**
- * Lightweight function to get only photo IDs for generateStaticParams.
- * Does not fetch blur data, making it much faster for build time.
- */
 export async function getPhotoIds(): Promise<string[]> {
     "use cache";
     cacheLife({
@@ -105,6 +109,8 @@ export async function getPhotoIds(): Promise<string[]> {
         revalidate: 900,
         expire: 86400,
     });
+
+
     try {
         const results = await cloudinary.search
             .expression(`folder:${process.env.CLOUDINARY_FOLDER}/*`)
