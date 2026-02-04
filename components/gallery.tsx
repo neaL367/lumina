@@ -92,10 +92,10 @@ export function Gallery({ photos }: { photos: PhotoProps[] }) {
       <div className="inline-grid h-full grid-rows-4 grid-flow-col gap-4 p-6 auto-cols-[280px] sm:auto-cols-[350px] lg:auto-cols-[400px] min-h-0">
         <IntroCard />
 
-        {photos.map((photo) => (
+        {photos.map((photo, index) => (
           <Link
             key={photo.id}
-            href={`/p/${photo.id}`}
+            href={`/p/${index + 1}`}
             className="h-full block cursor-zoom-in active:scale-[0.98] transition-all"
             scroll={false}
           >

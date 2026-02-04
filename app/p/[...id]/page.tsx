@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { XIcon } from "lucide-react";
-import { getPhotoById, getPhotoIds } from "@/lib/photos";
+import { getPhotoById, getPhotoIds, getPhotos } from "@/lib/photos";
 import { baseUrl } from "@/utils/constants";
 import { ProgressiveViewer } from "@/components/progressive-viewer";
+import type { PhotoProps } from "@/utils/types";
 
 export async function generateStaticParams() {
     const photoIds = await getPhotoIds();
@@ -12,16 +13,29 @@ export async function generateStaticParams() {
         return [{ id: ["__placeholder__"] }];
     }
 
-    return photoIds.map((photoId) => ({
-        id: photoId.split("/"),
+    // Return indices for cleaner URLs
+    return photoIds.map((_, index) => ({
+        id: [(index + 1).toString()],
     }));
 }
 
 export async function generateMetadata(props: PageProps<"/p/[...id]">) {
     const { id } = await props.params;
-    const photoId = Array.isArray(id) ? id.join("/") : id;
+    const paramId = Array.isArray(id) ? id.join("/") : id;
 
-    const currentPhoto = await getPhotoById(photoId);
+    let currentPhoto: PhotoProps | null = null;
+    const numericIndex = parseInt(paramId, 10) - 1;
+
+    if (numericIndex >= 0) {
+        const photos = await getPhotos();
+        if (numericIndex < photos.length) {
+            currentPhoto = photos[numericIndex];
+        }
+    }
+
+    if (!currentPhoto) {
+        currentPhoto = await getPhotoById(paramId);
+    }
 
     if (!currentPhoto) {
         return {
@@ -38,7 +52,7 @@ export async function generateMetadata(props: PageProps<"/p/[...id]">) {
         openGraph: {
             title: "Neal367's photos",
             description: "a collection of my favorite memories.❣️",
-            url: `${baseUrl}/p/${photoId}`,
+            url: `${baseUrl}/p/${paramId}`,
             images: [
                 {
                     url: imageUrl,
@@ -59,9 +73,21 @@ export async function generateMetadata(props: PageProps<"/p/[...id]">) {
 
 export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
     const { id } = await props.params;
-    const photoId = Array.isArray(id) ? id.join("/") : id;
+    const paramId = Array.isArray(id) ? id.join("/") : id;
 
-    const currentPhoto = await getPhotoById(photoId);
+    let currentPhoto: PhotoProps | null = null;
+    const numericIndex = parseInt(paramId, 10) - 1;
+
+    if (numericIndex >= 0) {
+        const photos = await getPhotos();
+        if (numericIndex < photos.length) {
+            currentPhoto = photos[numericIndex];
+        }
+    }
+
+    if (!currentPhoto) {
+        currentPhoto = await getPhotoById(paramId);
+    }
 
     if (!currentPhoto) {
         return notFound();

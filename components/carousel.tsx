@@ -218,9 +218,12 @@ export function Carousel({ photos, children }: CarouselProps) {
   const params = useParams();
 
   // Determine current index from URL segment
+  // Determine current index from URL segment (index or ID)
   const photoId = Array.isArray(params?.id) ? params.id.join("/") : params?.id;
-  const urlIndex = photos.findIndex((p) => p.id === photoId);
-  const currentIndex = urlIndex !== -1 ? urlIndex : 0;
+  const numericIndex = photoId ? parseInt(photoId, 10) - 1 : -1;
+  const currentIndex = (numericIndex >= 0 && numericIndex < photos.length)
+    ? numericIndex
+    : Math.max(0, photos.findIndex((p) => p.id === photoId));
 
   const [loading, setLoading] = useState(false);
   const [, startTransition] = useTransition();
@@ -237,9 +240,9 @@ export function Carousel({ photos, children }: CarouselProps) {
         setLoading(true);
       });
 
-      router.replace(`/p/${photos[newIndex].id}`, { scroll: false });
+      router.replace(`/p/${newIndex + 1}`, { scroll: false });
     },
-    [currentIndex, photos, router]
+    [currentIndex, router]
   );
 
   const handleNext = useCallback(() => {
