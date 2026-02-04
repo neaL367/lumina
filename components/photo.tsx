@@ -5,7 +5,7 @@ import { useState } from "react";
 import { CLOUD_NAME } from "@/utils/constants";
 import type { PhotoProps } from "@/utils/types";
 
-export function PhotoView({ photo }: { photo: PhotoProps }) {
+export function Photo({ photo }: { photo: PhotoProps }) {
     const [loading, setLoading] = useState(true);
 
     return (

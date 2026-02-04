@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { XIcon } from "lucide-react";
 import { getPhotoById, getPhotoIds, getPhotos } from "@/lib/photos";
 import { baseUrl, CLOUD_NAME } from "@/utils/constants";
-import { PhotoView } from "@/components/photo-view";
+import { Photo } from "@/components/photo";
 import type { PhotoProps } from "@/utils/types";
 
 export async function generateStaticParams() {
@@ -105,7 +105,7 @@ export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
 
             <div className="relative w-full h-screen flex items-center justify-center">
                 <div className="relative w-full max-w-5xl h-full max-h-[90vh]">
-                    <PhotoView photo={currentPhoto} />
+                    <Photo photo={currentPhoto} />
                 </div>
             </div>
         </div>
