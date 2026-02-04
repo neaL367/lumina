@@ -78,24 +78,6 @@ export function CarouselMain() {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Low-res placeholder */}
-      <Image
-        key={`low-${currentImage.id}`}
-        src={getCloudinaryUrl(currentImage.public_id, currentImage.format, 300)}
-        width={300}
-        height={200}
-        alt=""
-        aria-hidden="true"
-        className={`max-h-full max-w-full object-contain transition-opacity duration-700 ease-in-out ${loading ? "opacity-100 scale-100 blur-lg" : "opacity-0 scale-95 blur-none"
-          }`}
-        style={{
-          height: "auto",
-          width: "auto",
-          position: "absolute",
-        } as React.CSSProperties}
-      />
-
-      {/* High-res image */}
       <Image
         key={currentImage.id}
         src={getCloudinaryUrl(currentImage.public_id, currentImage.format, 1280)}
@@ -151,23 +133,25 @@ function CarouselThumbnails() {
 
   useXScroll(scrollContainerRef, {
     friction: 0.92,
-    sensitivity: 1,
+    sensitivity: 0.45,
   });
 
   // Scroll active thumbnail into view
   useEffect(() => {
     const activeItem = scrollContainerRef.current?.children[currentIndex] as HTMLElement;
-    if (activeItem && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const scrollLeft = activeItem.offsetLeft - container.offsetWidth / 2 + activeItem.offsetWidth / 2;
-      container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+    if (activeItem) {
+      activeItem.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
     }
   }, [currentIndex]);
 
   return (
     <div
       ref={scrollContainerRef}
-      className="flex gap-2 px-4 py-4 overflow-x-auto snap-x snap-mandatory w-full items-center [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-zinc-900 [&::-webkit-scrollbar-thumb]:bg-zinc-600 [&::-webkit-scrollbar-thumb]:rounded-full"
+      className="flex gap-4 px-[calc(50%-3rem)] md:px-[calc(50%-3.75rem)] py-4 overflow-x-auto snap-x snap-mandatory w-full items-center [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-zinc-900/50 [&::-webkit-scrollbar-thumb]:bg-zinc-600/50 [&::-webkit-scrollbar-thumb]:rounded-full"
     >
       {photos.map((photo, i) => (
         <button
@@ -304,7 +288,7 @@ export function Carousel({ photos, children }: CarouselProps) {
 
   return (
     <CarouselContext.Provider value={contextValue}>
-      <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950/95 backdrop-blur-2xl overflow-hidden h-screen">
+      <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950/95 backdrop-blur-2xl overflow-hidden h-dvh">
         {/* Actions Header */}
         <div className="absolute top-0 right-0 p-4 md:p-6 z-50 flex justify-end">
           <CarouselActions />
