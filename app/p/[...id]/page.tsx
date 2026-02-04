@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { XIcon } from "lucide-react";
 import { getPhotoById, getPhotoIds, getPhotos } from "@/lib/photos";
-import { baseUrl } from "@/utils/constants";
-import { ProgressiveViewer } from "@/components/progressive-viewer";
+import { baseUrl, CLOUD_NAME } from "@/utils/constants";
+import { PhotoView } from "@/components/photo-view";
 import type { PhotoProps } from "@/utils/types";
 
 export async function generateStaticParams() {
@@ -43,7 +43,7 @@ export async function generateMetadata(props: PageProps<"/p/[...id]">) {
         };
     }
 
-    const imageUrl = `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720/${currentPhoto.public_id}.${currentPhoto.format}`;
+    const imageUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_720/${currentPhoto.public_id}.${currentPhoto.format}`;
 
     return {
         title: "Neal367's photos",
@@ -105,7 +105,7 @@ export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
 
             <div className="relative w-full h-screen flex items-center justify-center">
                 <div className="relative w-full max-w-5xl h-full max-h-[90vh]">
-                    <ProgressiveViewer photo={currentPhoto} />
+                    <PhotoView photo={currentPhoto} />
                 </div>
             </div>
         </div>

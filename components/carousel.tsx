@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { CarouselContextType, PhotoProps } from "@/utils/types";
 import { useXScroll } from "@/hooks/use-x-scroll";
+import { CLOUD_NAME } from "@/utils/constants";
 
 // --- Context ---
 
@@ -35,7 +36,6 @@ function useCarousel() {
 
 // --- Utils ---
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 const getCloudinaryUrl = (publicId: string, format: string, width: number) => {
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_${width},q_auto,f_auto/${publicId}.${format}`;
@@ -78,6 +78,11 @@ export function CarouselMain() {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center z-20">
+          <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+        </div>
+      )}
       <Image
         key={currentImage.id}
         src={getCloudinaryUrl(currentImage.public_id, currentImage.format, 1280)}
@@ -225,7 +230,7 @@ export function Carousel({ photos, children }: CarouselProps) {
     ? numericIndex
     : Math.max(0, photos.findIndex((p) => p.id === photoId));
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [, startTransition] = useTransition();
 
   const closeModal = useCallback(() => {

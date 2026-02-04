@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { Github, Twitter } from "lucide-react";
+import { CLOUD_NAME } from "@/utils/constants";
 
 import { useXScroll } from "@/hooks/use-x-scroll";
 import type { PhotoProps } from "@/utils/types";
@@ -42,7 +43,6 @@ const IntroCard = () => (
   </div>
 );
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 function PhotoCard({ photo }: { photo: PhotoProps }) {
   const [isHighResLoaded, setIsHighResLoaded] = useState(false);

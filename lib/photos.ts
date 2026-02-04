@@ -1,6 +1,7 @@
 import { cacheLife } from "next/cache";
 import cloudinary from "./cloudinary";
 import type { PhotoProps } from "@/utils/types";
+import { CLOUD_NAME } from "@/utils/constants";
 
 type CloudinaryResource = {
     public_id: string;
@@ -13,15 +14,9 @@ async function getBase64ImageUrl(
     imageId: string,
     format: string
 ): Promise<string | undefined> {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    if (!cloudName) {
-        console.error("Cloudinary cloud name is not defined in env.");
-        return undefined;
-    }
-
     try {
         const response = await fetch(
-            `https://res.cloudinary.com/${cloudName}/image/upload/w_100,e_blur:1000,q_auto,f_webp/${imageId}.${format}`
+            `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/w_100,e_blur:1000,q_auto,f_webp/${imageId}.${format}`
         );
 
         if (!response.ok) {
