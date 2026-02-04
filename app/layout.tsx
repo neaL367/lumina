@@ -22,21 +22,12 @@ export const metadata: Metadata = {
     siteName: "Neal367's photos",
     locale: "en_US",
     type: "website",
-    images: [
-      {
-        url: `${baseUrl}/opengraph-image.jpg`,
-        width: 1200,
-        height: 630,
-        alt: "Neal367's photos",
-      },
-    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Neal367's photos",
     description: "a collection of my favorite memories.❣️",
     creator: "@NL367",
-    images: `${baseUrl}/opengraph-image.jpg`,
   },
   robots: {
     index: true,
