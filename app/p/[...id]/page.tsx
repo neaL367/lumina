@@ -94,7 +94,7 @@ export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
     }
 
     return (
-        <div className="relative min-h-screen w-full flex items-center justify-center bg-black/95 backdrop-blur-sm">
+        <div className="relative min-h-dvh w-full flex items-center justify-center bg-black/95 backdrop-blur-sm">
             <Link
                 href="/"
                 className="absolute top-5 left-5 z-50 p-2 rounded-full bg-zinc-800/80 md:p-3 text-white transition hover:cursor-pointer hover:bg-zinc-600/80"
@@ -103,7 +103,7 @@ export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
                 <XIcon className="w-6 h-6" />
             </Link>
 
-            <div className="relative w-full h-screen flex items-center justify-center">
+            <div className="relative w-full h-dvh flex items-center justify-center">
                 <div className="relative w-full max-w-5xl h-full max-h-[90vh]">
                     <Photo photo={currentPhoto} />
                 </div>
