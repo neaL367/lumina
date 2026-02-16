@@ -55,6 +55,7 @@ function PhotoCard({ photo }: { photo: PhotoProps }) {
           alt=""
           src={`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_50,q_10,f_auto/${photo.public_id}.${photo.format}`}
           fill
+          sizes="(max-width: 640px) 280px, (max-width: 1024px) 350px, 400px"
           className={`object-cover transition-opacity duration-700 ${isHighResLoaded ? "opacity-0 scale-105" : "opacity-100 scale-100"
             }`}
           aria-hidden="true"

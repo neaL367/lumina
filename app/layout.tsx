@@ -47,8 +47,8 @@ export default function RootLayout(props: {
   modal: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.className} antialiased`}>
+    <html lang="en" className={`${geistSans.className} antialiased`}>
+      <body>
         {props.children}
         {props.modal}
       </body>

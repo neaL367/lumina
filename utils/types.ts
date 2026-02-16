@@ -16,4 +16,5 @@ export type CarouselContextType = {
   handlePrev: () => void;
   closeModal: () => void;
   goToIndex: (index: number) => void;
+  direction: "next" | "prev" | null;
 }

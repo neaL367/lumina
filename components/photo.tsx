@@ -23,7 +23,7 @@ export function Photo({ photo }: { photo: PhotoProps }) {
                 onLoad={() => setLoading(false)}
                 className={`object-contain transition-all duration-700 ease-in-out ${loading ? "opacity-0 scale-95 blur-md" : "opacity-100 scale-100 blur-0"
                     }`}
-                sizes="(max-width: 1024px) 100vw, 1280px"
+                sizes="100vw"
             />
         </div>
     );

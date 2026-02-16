@@ -44,7 +44,7 @@ const getCloudinaryUrl = (publicId: string, format: string, width: number) => {
 // --- Sub-components ---
 
 export function CarouselMain() {
-  const { currentIndex, photos, loading, setLoading, handleNext, handlePrev } = useCarousel();
+  const { currentIndex, photos, loading, setLoading, handleNext, handlePrev, direction } = useCarousel();
   const currentImage = photos[currentIndex];
 
   const touchStart = useRef<number | null>(null);
@@ -69,6 +69,9 @@ export function CarouselMain() {
     if (isRightSwipe) handlePrev();
   };
 
+  // Parallel Buffered Preloading (2 ahead, 2 behind)
+  const preloadIndices = [currentIndex - 2, currentIndex - 1, currentIndex + 1, currentIndex + 2];
+
   if (!currentImage) return null;
 
   return (
@@ -78,28 +81,43 @@ export function CarouselMain() {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center z-20">
-          <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin" />
-        </div>
-      )}
-      <Image
-        key={currentImage.id}
-        src={getCloudinaryUrl(currentImage.public_id, currentImage.format, 1280)}
-        width={1280}
-        height={853}
-        priority
-        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 90vw, 1280px"
-        alt={`Photo ${currentImage.id}`}
-        onLoad={() => setLoading(false)}
-        className={`max-h-full max-w-full object-contain transition-all duration-700 ease-in-out ${loading ? "opacity-0 scale-95 blur-md" : "opacity-100 scale-100 blur-0"
-          }`}
-        style={{
-          height: "auto",
-          width: "auto",
-          zIndex: 10,
-        } as React.CSSProperties}
-      />
+      <div className="relative w-full h-full flex items-center justify-center">
+        <Image
+          key={currentImage.id}
+          src={getCloudinaryUrl(currentImage.public_id, currentImage.format, 1920)}
+          fill
+          priority
+          placeholder="blur"
+          blurDataURL={currentImage.blurDataUrl}
+          sizes="100vw"
+          alt={`Photo ${currentImage.id}`}
+          onLoad={() => setLoading(false)}
+          onError={() => setLoading(false)}
+          className={`object-contain transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1) ${loading
+            ? `opacity-0 ${direction === "next" ? "translate-x-8" : direction === "prev" ? "-translate-x-8" : ""
+            }`
+            : "opacity-100 translate-x-0"
+            }`}
+        />
+      </div>
+
+      {/* Parallel Background Preloading */}
+      {preloadIndices.map((idx) => {
+        const p = photos[idx];
+        if (!p) return null;
+        return (
+          <div key={`preload-${p.id}`} className="hidden pointer-events-none" aria-hidden="true">
+            {/* Using native img for hidden preloads to avoid Next.js overhead for non-visible elements */}
+            <Image
+              src={getCloudinaryUrl(p.public_id, p.format, 1920)}
+              alt=""
+              width={1}
+              height={1}
+              priority={false}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -143,14 +161,19 @@ function CarouselThumbnails() {
 
   // Scroll active thumbnail into view
   useEffect(() => {
-    const activeItem = scrollContainerRef.current?.children[currentIndex] as HTMLElement;
-    if (activeItem) {
-      activeItem.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
-    }
+    // Small delay to ensure the container transition/render is complete
+    const timeoutId = setTimeout(() => {
+      const activeItem = scrollContainerRef.current?.children[currentIndex] as HTMLElement;
+      if (activeItem) {
+        activeItem.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }, 50);
+
+    return () => clearTimeout(timeoutId);
   }, [currentIndex]);
 
   return (
@@ -183,7 +206,7 @@ function CarouselThumbnails() {
   );
 }
 
-function CarouselActions() {
+export function CarouselActions() {
   const { currentIndex, photos, closeModal } = useCarousel();
   const currentImage = photos[currentIndex];
 
@@ -191,6 +214,11 @@ function CarouselActions() {
 
   return (
     <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 px-3.5 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-xs font-medium text-white/70 tabular-nums">
+        <span>{currentIndex + 1}</span>
+        <span className="opacity-40">/</span>
+        <span>{photos.length}</span>
+      </div>
       <a
         href={getCloudinaryUrl(currentImage.public_id, currentImage.format, 1920)}
         target="_blank"
@@ -202,10 +230,11 @@ function CarouselActions() {
       </a>
       <button
         onClick={closeModal}
-        className="rounded-full bg-black/50 p-2.5 text-white hover:bg-black/70 transition-colors hover:cursor-pointer"
+        className="flex items-center gap-2 rounded-full bg-black/50 p-2.5 px-3.5 h-10 text-white hover:bg-black/70 transition-colors hover:cursor-pointer"
         aria-label="Close gallery"
       >
         <XIcon className="w-5 h-5" />
+        <span className="hidden md:inline text-sm font-medium pr-1">Close</span>
       </button>
     </div>
   );
@@ -222,7 +251,6 @@ export function Carousel({ photos, children }: CarouselProps) {
   const router = useRouter();
   const params = useParams();
 
-  // Determine current index from URL segment
   // Determine current index from URL segment (index or ID)
   const photoId = Array.isArray(params?.id) ? params.id.join("/") : params?.id;
   const numericIndex = photoId ? parseInt(photoId, 10) - 1 : -1;
@@ -231,7 +259,9 @@ export function Carousel({ photos, children }: CarouselProps) {
     : Math.max(0, photos.findIndex((p) => p.id === photoId));
 
   const [loading, setLoading] = useState(true);
+  const [direction, setDirection] = useState<"next" | "prev" | null>(null);
   const [, startTransition] = useTransition();
+  const isNavigating = useRef(false);
 
   const closeModal = useCallback(() => {
     router.back();
@@ -239,13 +269,21 @@ export function Carousel({ photos, children }: CarouselProps) {
 
   const goToIndex = useCallback(
     (newIndex: number) => {
-      if (newIndex === currentIndex) return;
+      if (newIndex === currentIndex || isNavigating.current) return;
+
+      isNavigating.current = true;
+      setDirection(newIndex > currentIndex ? "next" : "prev");
 
       startTransition(() => {
         setLoading(true);
       });
 
       router.replace(`/p/${newIndex + 1}`, { scroll: false });
+
+      // Prevent spamming - match this duration with a significant portion of the transition
+      setTimeout(() => {
+        isNavigating.current = false;
+      }, 450);
     },
     [currentIndex, router]
   );
@@ -282,6 +320,7 @@ export function Carousel({ photos, children }: CarouselProps) {
       handlePrev,
       closeModal,
       goToIndex,
+      direction,
     }),
     [
       currentIndex,
@@ -291,6 +330,7 @@ export function Carousel({ photos, children }: CarouselProps) {
       handlePrev,
       closeModal,
       goToIndex,
+      direction,
     ]
   );
 

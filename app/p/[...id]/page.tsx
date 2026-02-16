@@ -97,14 +97,15 @@ export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
         <div className="relative min-h-dvh w-full flex items-center justify-center bg-black/95 backdrop-blur-sm">
             <Link
                 href="/"
-                className="absolute top-5 left-5 z-50 p-2 rounded-full bg-zinc-800/80 md:p-3 text-white transition hover:cursor-pointer hover:bg-zinc-600/80"
+                className="absolute top-5 left-5 z-50 flex items-center gap-2 rounded-full bg-zinc-800/80 p-2.5 px-4 text-white transition hover:cursor-pointer hover:bg-zinc-600/80"
                 aria-label="Back to gallery"
             >
                 <XIcon className="w-6 h-6" />
+                <span className="font-medium">Back</span>
             </Link>
 
             <div className="relative w-full h-dvh flex items-center justify-center">
-                <div className="relative w-full max-w-5xl h-full max-h-[90vh]">
+                <div className="relative w-full h-full p-4 md:p-12">
                     <Photo photo={currentPhoto} />
                 </div>
             </div>
