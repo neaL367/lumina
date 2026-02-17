@@ -17,6 +17,6 @@ export type CarouselContextType = {
   closeModal: () => void;
   goToIndex: (index: number) => void;
   direction: "next" | "prev" | null;
-  isNavigatingRef: React.RefObject<boolean | null>;
+  isNavigatingRef: React.RefObject<boolean>;
   pendingIndexRef: React.RefObject<number | null>;
 };

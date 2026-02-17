@@ -7,10 +7,10 @@ import {
   useState,
   useRef,
   useCallback,
-  useTransition,
   createContext,
+  useContext,
   useMemo,
-  use,
+  useTransition,
 } from "react";
 import {
   ChevronLeftIcon,
@@ -27,7 +27,7 @@ import { CLOUD_NAME } from "@/utils/constants";
 const CarouselContext = createContext<CarouselContextType | null>(null);
 
 function useCarousel() {
-  const context = use(CarouselContext);
+  const context = useContext(CarouselContext);
   if (!context) {
     throw new Error("Carousel components must be used within a Carousel root");
   }
@@ -88,13 +88,13 @@ export function CarouselMain() {
           fill
           priority
           placeholder="blur"
-          loading="eager"
           blurDataURL={currentImage.blurDataUrl}
           sizes="100vw"
           alt={`Photo ${currentImage.id}`}
           onLoad={() => {
             setLoading(false);
-            if (pendingIndexRef.current === currentIndex) {
+            // only unlock if this load corresponds to the latest navigation
+            if (pendingIndexRef.current === null || photos[pendingIndexRef.current]?.id === currentImage.id) {
               isNavigatingRef.current = false;
             }
           }}
@@ -283,15 +283,12 @@ export function Carousel({ photos, children }: CarouselProps) {
 
       isNavigatingRef.current = true;
       pendingIndexRef.current = newIndex;
+
       setDirection(newIndex > currentIndex ? "next" : "prev");
-
-      startTransition(() => {
-        setLoading(true);
-      });
-
+      startTransition(() => setLoading(true));
       router.replace(`/p/${newIndex + 1}`, { scroll: false });
     },
-    [currentIndex, router]
+    [currentIndex, router, startTransition]
   );
 
   const handleNext = useCallback(() => {
