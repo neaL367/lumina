@@ -44,7 +44,7 @@ const getCloudinaryUrl = (publicId: string, format: string, width: number) => {
 // --- Sub-components ---
 
 export function CarouselMain() {
-  const { currentIndex, photos, loading, setLoading, handleNext, handlePrev, direction } = useCarousel();
+  const { currentIndex, photos, loading, setLoading, handleNext, handlePrev, direction, isNavigatingRef, pendingIndexRef } = useCarousel();
   const currentImage = photos[currentIndex];
 
   const touchStart = useRef<number | null>(null);
@@ -88,11 +88,20 @@ export function CarouselMain() {
           fill
           priority
           placeholder="blur"
+          loading="eager"
           blurDataURL={currentImage.blurDataUrl}
           sizes="100vw"
           alt={`Photo ${currentImage.id}`}
-          onLoad={() => setLoading(false)}
-          onError={() => setLoading(false)}
+          onLoad={() => {
+            setLoading(false);
+            if (pendingIndexRef.current === currentIndex) {
+              isNavigatingRef.current = false;
+            }
+          }}
+          onError={() => {
+            setLoading(false);
+            isNavigatingRef.current = false;
+          }}
           className={`object-contain transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1) ${loading
             ? `opacity-0 ${direction === "next" ? "translate-x-8" : direction === "prev" ? "-translate-x-8" : ""
             }`
@@ -261,7 +270,8 @@ export function Carousel({ photos, children }: CarouselProps) {
   const [loading, setLoading] = useState(true);
   const [direction, setDirection] = useState<"next" | "prev" | null>(null);
   const [, startTransition] = useTransition();
-  const isNavigating = useRef(false);
+  const isNavigatingRef = useRef(false);
+  const pendingIndexRef = useRef<number | null>(null);
 
   const closeModal = useCallback(() => {
     router.back();
@@ -269,9 +279,10 @@ export function Carousel({ photos, children }: CarouselProps) {
 
   const goToIndex = useCallback(
     (newIndex: number) => {
-      if (newIndex === currentIndex || isNavigating.current) return;
+      if (newIndex === currentIndex || isNavigatingRef.current) return;
 
-      isNavigating.current = true;
+      isNavigatingRef.current = true;
+      pendingIndexRef.current = newIndex;
       setDirection(newIndex > currentIndex ? "next" : "prev");
 
       startTransition(() => {
@@ -279,11 +290,6 @@ export function Carousel({ photos, children }: CarouselProps) {
       });
 
       router.replace(`/p/${newIndex + 1}`, { scroll: false });
-
-      // Prevent spamming - match this duration with a significant portion of the transition
-      setTimeout(() => {
-        isNavigating.current = false;
-      }, 450);
     },
     [currentIndex, router]
   );
@@ -321,6 +327,8 @@ export function Carousel({ photos, children }: CarouselProps) {
       closeModal,
       goToIndex,
       direction,
+      isNavigatingRef,
+      pendingIndexRef,
     }),
     [
       currentIndex,
@@ -331,6 +339,8 @@ export function Carousel({ photos, children }: CarouselProps) {
       closeModal,
       goToIndex,
       direction,
+      isNavigatingRef,
+      pendingIndexRef,
     ]
   );
 
