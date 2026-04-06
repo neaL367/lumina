@@ -1,17 +1,12 @@
-import { Suspense } from "react";
-
-import { GallerySkeleton } from "@/components/gallery-skeleton";
 import { Gallery } from "@/components/gallery";
 import { getPhotos } from "@/lib/photos";
 
-export default async function Home() {
+export default async function Home(): Promise<React.JSX.Element> {
   const photos = await getPhotos();
 
   return (
-    <main className="w-full h-dvh bg-zinc-50 dark:bg-black overflow-hidden">
-      <Suspense fallback={<GallerySkeleton />}>
-        <Gallery photos={photos} />
-      </Suspense>
+    <main className={`w-full h-dvh bg-zinc-50 dark:bg-black overflow-hidden`}>
+      <Gallery photos={photos} />
     </main>
   );
 }

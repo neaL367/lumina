@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { XIcon } from "lucide-react";
@@ -6,11 +7,11 @@ import { baseUrl, CLOUD_NAME } from "@/utils/constants";
 import { Photo } from "@/components/photo";
 import type { PhotoProps } from "@/utils/types";
 
-export async function generateStaticParams() {
+export async function generateStaticParams(): Promise<{ id: string[] }[]> {
     const photoIds = await getPhotoIds();
 
     if (!photoIds || photoIds.length === 0) {
-        return [{ id: ["__placeholder__"] }];
+        return [{ id: [`__placeholder__`] }];
     }
 
     // Return indices for cleaner URLs
@@ -19,9 +20,9 @@ export async function generateStaticParams() {
     }));
 }
 
-export async function generateMetadata(props: PageProps<"/p/[...id]">) {
+export async function generateMetadata(props: PageProps<"/p/[...id]">): Promise<Metadata> {
     const { id } = await props.params;
-    const paramId = Array.isArray(id) ? id.join("/") : id;
+    const paramId = Array.isArray(id) ? id.join(`/`) : id;
 
     let currentPhoto: PhotoProps | null = null;
     const numericIndex = parseInt(paramId, 10) - 1;
@@ -39,41 +40,41 @@ export async function generateMetadata(props: PageProps<"/p/[...id]">) {
 
     if (!currentPhoto) {
         return {
-            title: "Photo Not Found",
+            title: `Photo Not Found`,
         };
     }
 
     const imageUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_720/${currentPhoto.public_id}.${currentPhoto.format}`;
 
     return {
-        title: "Neal367's photos",
-        description: "a collection of my favorite memories.❣️",
+        title: `Neal367's photos`,
+        description: `a collection of my favorite memories.❣️`,
 
         openGraph: {
-            title: "Neal367's photos",
-            description: "a collection of my favorite memories.❣️",
+            title: `Neal367's photos`,
+            description: `a collection of my favorite memories.❣️`,
             url: `${baseUrl}/p/${paramId}`,
             images: [
                 {
                     url: imageUrl,
                     width: 720,
-                    alt: "Neal367's photos",
+                    alt: `Neal367's photos`,
                 },
             ],
         },
 
         twitter: {
-            card: "summary_large_image",
-            title: "Neal367's photos",
-            description: "a collection of my favorite memories.❣️",
+            card: `summary_large_image`,
+            title: `Neal367's photos`,
+            description: `a collection of my favorite memories.❣️`,
             images: [imageUrl],
         },
     };
 }
 
-export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
+export default async function PhotoPage(props: PageProps<"/p/[...id]">): Promise<React.JSX.Element> {
     const { id } = await props.params;
-    const paramId = Array.isArray(id) ? id.join("/") : id;
+    const paramId = Array.isArray(id) ? id.join(`/`) : id;
 
     let currentPhoto: PhotoProps | null = null;
     const numericIndex = parseInt(paramId, 10) - 1;
@@ -94,18 +95,18 @@ export default async function PhotoPage(props: PageProps<"/p/[...id]">) {
     }
 
     return (
-        <div className="relative min-h-dvh w-full flex items-center justify-center bg-black/95 backdrop-blur-sm">
+        <div className={`relative min-h-dvh w-full flex items-center justify-center bg-black/95 backdrop-blur-sm`}>
             <Link
-                href="/"
-                className="absolute top-5 left-5 z-50 flex items-center gap-2 rounded-full bg-zinc-800/80 p-2.5 px-4 text-white transition hover:cursor-pointer hover:bg-zinc-600/80"
-                aria-label="Back to gallery"
+                href={`/`}
+                className={`absolute top-5 left-5 z-50 flex items-center gap-2 rounded-full bg-zinc-800/80 p-2.5 px-4 text-white transition hover:cursor-pointer hover:bg-zinc-600/80`}
+                aria-label={`Back to gallery`}
             >
-                <XIcon className="w-6 h-6" />
-                <span className="font-medium">Back</span>
+                <XIcon className={`w-6 h-6`} />
+                <span className={`font-medium`}>{`Back`}</span>
             </Link>
 
-            <div className="relative w-full h-dvh flex items-center justify-center">
-                <div className="relative w-full h-full p-4 md:p-12">
+            <div className={`relative w-full h-dvh flex items-center justify-center`}>
+                <div className={`relative w-full h-full p-4 md:p-12`}>
                     <Photo photo={currentPhoto} />
                 </div>
             </div>

@@ -8,9 +8,10 @@ import {
   useRef,
   useCallback,
   createContext,
-  useContext,
   useMemo,
   useTransition,
+  use,
+  memo,
 } from "react";
 import {
   ChevronLeftIcon,
@@ -27,7 +28,7 @@ import { CLOUD_NAME } from "@/utils/constants";
 const CarouselContext = createContext<CarouselContextType | null>(null);
 
 function useCarousel() {
-  const context = useContext(CarouselContext);
+  const context = use(CarouselContext);
   if (!context) {
     throw new Error("Carousel components must be used within a Carousel root");
   }
@@ -43,7 +44,7 @@ const getCloudinaryUrl = (publicId: string, format: string, width: number) => {
 
 // --- Sub-components ---
 
-export function CarouselMain() {
+export const CarouselMain = memo(function CarouselMain() {
   const { currentIndex, photos, loading, setLoading, handleNext, handlePrev, direction, isNavigatingRef, pendingIndexRef } = useCarousel();
   const currentImage = photos[currentIndex];
 
@@ -76,20 +77,20 @@ export function CarouselMain() {
 
   return (
     <div
-      className="relative h-full w-full flex items-center justify-center overflow-hidden"
+      className={`relative h-full w-full flex items-center justify-center overflow-hidden`}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      <div className="relative w-full h-full flex items-center justify-center">
+      <div className={`relative w-full h-full flex items-center justify-center`}>
         <Image
           key={currentImage.id}
           src={getCloudinaryUrl(currentImage.public_id, currentImage.format, 1920)}
           fill
           priority
-          placeholder="blur"
+          placeholder={currentImage.blurDataUrl ? `blur` : `empty`}
           blurDataURL={currentImage.blurDataUrl}
-          sizes="100vw"
+          sizes={`100vw`}
           alt={`Photo ${currentImage.id}`}
           onLoad={() => {
             setLoading(false);
@@ -103,9 +104,8 @@ export function CarouselMain() {
             isNavigatingRef.current = false;
           }}
           className={`object-contain transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1) ${loading
-            ? `opacity-0 ${direction === "next" ? "translate-x-8" : direction === "prev" ? "-translate-x-8" : ""
-            }`
-            : "opacity-100 translate-x-0"
+            ? `opacity-0 ${direction === `next` ? `translate-x-8` : direction === `prev` ? `-translate-x-8` : ``}`
+            : `opacity-100 translate-x-0`
             }`}
         />
       </div>
@@ -113,8 +113,7 @@ export function CarouselMain() {
       {/* Parallel Background Preloading */}
       {preloadIndices.map((idx) => {
         const p = photos[idx];
-        if (!p) return null;
-        return (
+        return p ? (
           <div key={`preload-${p.id}`} className="hidden pointer-events-none" aria-hidden="true">
             {/* Using native img for hidden preloads to avoid Next.js overhead for non-visible elements */}
             <Image
@@ -125,41 +124,41 @@ export function CarouselMain() {
               priority={false}
             />
           </div>
-        );
+        ) : null;
       })}
     </div>
   );
-}
+});
 
-function CarouselNavigation() {
+const CarouselNavigation = memo(function CarouselNavigation() {
   const { currentIndex, photos, handleNext, handlePrev } = useCarousel();
 
   return (
     <>
-      {currentIndex > 0 && (
+      {currentIndex > 0 ? (
         <button
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/50 p-2 md:p-4 text-white hover:bg-black/70 transition-colors hover:cursor-pointer"
+          className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/50 p-2 md:p-4 text-white hover:bg-black/70 transition-colors hover:cursor-pointer`}
           onClick={handlePrev}
-          aria-label="Previous image"
+          aria-label={`Previous image`}
         >
-          <ChevronLeftIcon className="w-6 h-6 md:w-8 md:h-8" />
+          <ChevronLeftIcon className={`w-6 h-6 md:w-8 md:h-8`} />
         </button>
-      )}
+      ) : null}
 
-      {currentIndex + 1 < photos.length && (
+      {currentIndex + 1 < photos.length ? (
         <button
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/50 p-2 md:p-4 text-white hover:bg-black/70 transition-colors hover:cursor-pointer"
+          className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/50 p-2 md:p-4 text-white hover:bg-black/70 transition-colors hover:cursor-pointer`}
           onClick={handleNext}
-          aria-label="Next image"
+          aria-label={`Next image`}
         >
-          <ChevronRightIcon className="w-6 h-6 md:w-8 md:h-8" />
+          <ChevronRightIcon className={`w-6 h-6 md:w-8 md:h-8`} />
         </button>
-      )}
+      ) : null}
     </>
   );
-}
+});
 
-function CarouselThumbnails() {
+const CarouselThumbnails = memo(function CarouselThumbnails() {
   const { currentIndex, photos, goToIndex } = useCarousel();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -188,66 +187,64 @@ function CarouselThumbnails() {
   return (
     <div
       ref={scrollContainerRef}
-      className="flex gap-4 px-[calc(50%-3rem)] md:px-[calc(50%-3.75rem)] py-4 overflow-x-auto snap-x snap-mandatory w-full items-center [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-zinc-900/50 [&::-webkit-scrollbar-thumb]:bg-zinc-600/50 [&::-webkit-scrollbar-thumb]:rounded-full"
+      className={`flex gap-4 px-[calc(50%-3rem)] md:px-[calc(50%-3.75rem)] py-4 overflow-x-auto snap-x snap-mandatory w-full items-center [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-zinc-900/50 [&::-webkit-scrollbar-thumb]:bg-zinc-600/50 [&::-webkit-scrollbar-thumb]:rounded-full`}
     >
       {photos.map((photo, i) => (
         <button
           key={photo.id}
           onClick={() => goToIndex(i)}
           className={`relative aspect-3/2 h-16 md:h-20 shrink-0 overflow-hidden rounded-md transition-all snap-center ${i === currentIndex
-            ? "ring-2 ring-white scale-110 z-10 brightness-110"
-            : "brightness-50 hover:brightness-75 hover:cursor-zoom-in"
+            ? `ring-2 ring-white scale-110 z-10 brightness-110`
+            : `brightness-50 hover:brightness-75 hover:cursor-zoom-in`
             }`}
           aria-label={`View photo ${photo.id}`}
         >
           <Image
             src={getCloudinaryUrl(photo.public_id, photo.format, 200)}
-            alt="thumbnail"
+            alt={`thumbnail`}
             fill
-            placeholder="blur"
+            placeholder={photo.blurDataUrl ? `blur` : `empty`}
             blurDataURL={photo.blurDataUrl}
-            className="object-cover"
-            sizes="120px"
+            className={`object-cover`}
+            sizes={`120px`}
           />
         </button>
       ))}
     </div>
   );
-}
+});
 
-export function CarouselActions() {
+export const CarouselActions = memo(function CarouselActions() {
   const { currentIndex, photos, closeModal } = useCarousel();
   const currentImage = photos[currentIndex];
 
-  if (!currentImage) return null;
-
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-1.5 px-3.5 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-xs font-medium text-white/70 tabular-nums">
+  return currentImage ? (
+    <div className={`flex items-center gap-3`}>
+      <div className={`flex items-center gap-1.5 px-3.5 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-xs font-medium text-white/70 tabular-nums`}>
         <span>{currentIndex + 1}</span>
-        <span className="opacity-40">/</span>
+        <span className={`opacity-40`}>/</span>
         <span>{photos.length}</span>
       </div>
       <a
         href={getCloudinaryUrl(currentImage.public_id, currentImage.format, 1920)}
-        target="_blank"
-        rel="noreferrer"
-        className="rounded-full bg-black/50 p-2.5 text-white hover:bg-black/70 transition-colors"
-        title="Open full size"
+        target={`_blank`}
+        rel={`noreferrer`}
+        className={`rounded-full bg-black/50 p-2.5 text-white hover:bg-black/70 transition-colors`}
+        title={`Open full size`}
       >
-        <ExternalLink className="w-5 h-5" />
+        <ExternalLink className={`w-5 h-5`} />
       </a>
       <button
         onClick={closeModal}
-        className="flex items-center gap-2 rounded-full bg-black/50 p-2.5 px-3.5 h-10 text-white hover:bg-black/70 transition-colors hover:cursor-pointer"
-        aria-label="Close gallery"
+        className={`flex items-center gap-2 rounded-full bg-black/50 p-2.5 px-3.5 h-10 text-white hover:bg-black/70 transition-colors hover:cursor-pointer`}
+        aria-label={`Close gallery`}
       >
-        <XIcon className="w-5 h-5" />
-        <span className="hidden md:inline text-sm font-medium pr-1">Close</span>
+        <XIcon className={`w-5 h-5`} />
+        <span className={`hidden md:inline text-sm font-medium pr-1`}>Close</span>
       </button>
     </div>
-  );
-}
+  ) : null;
+});
 
 // --- Root Component ---
 
@@ -256,17 +253,29 @@ interface CarouselProps {
   children?: React.ReactNode;
 }
 
-export function Carousel({ photos, children }: CarouselProps) {
+export function Carousel(props: CarouselProps) {
   const router = useRouter();
   const params = useParams();
 
-  // Determine current index from URL segment (index or ID)
-  const photoId = Array.isArray(params?.id) ? params.id.join("/") : params?.id;
-  const numericIndex = photoId ? parseInt(photoId, 10) - 1 : -1;
-  const currentIndex = (numericIndex >= 0 && numericIndex < photos.length)
-    ? numericIndex
-    : Math.max(0, photos.findIndex((p) => p.id === photoId));
+  // Initial index calculation function
+  const getIndexFromParams = useCallback(() => {
+    const photoId = Array.isArray(params?.id) ? params.id.join(`/`) : params?.id;
+    const numericIndex = photoId ? (parseInt(photoId, 10) - 1) : -1;
+    return (numericIndex >= 0 && numericIndex < props.photos.length)
+      ? numericIndex
+      : Math.max(0, props.photos.findIndex((p) => p.id === photoId));
+  }, [params, props.photos]);
 
+  const [currentIndex, setCurrentIndex] = useState(getIndexFromParams);
+  const [prevParamId, setPrevParamId] = useState(params?.id);
+
+  // Sync state if URL changes externally (e.g. browser back/forward)
+  // This is the recommended pattern for syncing state from props/params during render
+  if (params?.id !== prevParamId) {
+    const newIndex = getIndexFromParams();
+    setPrevParamId(params?.id);
+    setCurrentIndex(newIndex);
+  }
   const [loading, setLoading] = useState(true);
   const [direction, setDirection] = useState<"next" | "prev" | null>(null);
   const [, startTransition] = useTransition();
@@ -284,18 +293,23 @@ export function Carousel({ photos, children }: CarouselProps) {
       isNavigatingRef.current = true;
       pendingIndexRef.current = newIndex;
 
-      setDirection(newIndex > currentIndex ? "next" : "prev");
-      startTransition(() => setLoading(true));
+      setDirection(newIndex > currentIndex ? `next` : `prev`);
+      startTransition(() => {
+        setLoading(true);
+        setCurrentIndex(newIndex);
+      });
+
+      // Background URL update to keep history/deep-links in sync without blocking UI
       router.replace(`/p/${newIndex + 1}`, { scroll: false });
     },
     [currentIndex, router, startTransition]
   );
 
   const handleNext = useCallback(() => {
-    if (currentIndex + 1 < photos.length) {
+    if (currentIndex + 1 < props.photos.length) {
       goToIndex(currentIndex + 1);
     }
-  }, [currentIndex, photos.length, goToIndex]);
+  }, [currentIndex, props.photos.length, goToIndex]);
 
   const handlePrev = useCallback(() => {
     if (currentIndex > 0) {
@@ -305,18 +319,18 @@ export function Carousel({ photos, children }: CarouselProps) {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") handleNext();
-      if (e.key === "ArrowLeft") handlePrev();
-      if (e.key === "Escape") closeModal();
+      if (e.key === `ArrowRight`) handleNext();
+      if (e.key === `ArrowLeft`) handlePrev();
+      if (e.key === `Escape`) closeModal();
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener(`keydown`, onKeyDown);
+    return () => window.removeEventListener(`keydown`, onKeyDown);
   }, [handleNext, handlePrev, closeModal]);
 
   const contextValue = useMemo(
     () => ({
       currentIndex,
-      photos,
+      photos: props.photos,
       loading,
       setLoading,
       handleNext,
@@ -329,7 +343,7 @@ export function Carousel({ photos, children }: CarouselProps) {
     }),
     [
       currentIndex,
-      photos,
+      props.photos,
       loading,
       handleNext,
       handlePrev,
@@ -343,20 +357,20 @@ export function Carousel({ photos, children }: CarouselProps) {
 
   return (
     <CarouselContext.Provider value={contextValue}>
-      <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950/95 backdrop-blur-2xl overflow-hidden h-dvh">
+      <div className={`fixed inset-0 z-50 flex flex-col bg-zinc-950/95 backdrop-blur-2xl overflow-hidden h-dvh`}>
         {/* Actions Header */}
-        <div className="absolute top-0 right-0 p-4 md:p-6 z-50 flex justify-end">
+        <div className={`absolute top-0 right-0 p-4 md:p-6 z-50 flex justify-end`}>
           <CarouselActions />
         </div>
 
         {/* Main Workspace */}
-        <div className="flex-1 min-h-0 relative flex items-center justify-center p-4 md:p-8">
-          {children || <CarouselMain />}
+        <div className={`flex-1 min-h-0 relative flex items-center justify-center p-4 md:p-8`}>
+          {props.children ? props.children : <CarouselMain />}
           <CarouselNavigation />
         </div>
 
         {/* Thumbnails Workspace */}
-        <div className="w-full shrink-0 bg-black/20 border-t border-white/5 pb-2 md:pb-4">
+        <div className={`w-full shrink-0 bg-black/20 border-t border-white/5 pb-2 md:pb-4`}>
           <CarouselThumbnails />
         </div>
       </div>

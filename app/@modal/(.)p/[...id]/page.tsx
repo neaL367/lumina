@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPhotos, getPhotoIds } from "@/lib/photos";
+import { getPhotoIds } from "@/lib/photos";
 
 export async function generateStaticParams() {
     const photoIds = await getPhotoIds();
@@ -16,15 +16,7 @@ export async function generateStaticParams() {
 
 export default async function PhotoModal(props: PageProps<"/p/[...id]">) {
     const { id } = await props.params;
-    const paramId = Array.isArray(id) ? id.join("/") : id;
-
-    const photos = await getPhotos();
-    const numericIndex = parseInt(paramId, 10) - 1;
-    const currentPhoto = (numericIndex >= 0 && numericIndex < photos.length)
-        ? photos[numericIndex]
-        : photos.find((p) => p.id === paramId);
-
-    if (!currentPhoto) return notFound();
+    if (!id) return notFound();
 
     return null;
 }
