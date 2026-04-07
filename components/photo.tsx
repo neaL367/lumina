@@ -5,6 +5,10 @@ import { useState } from "react";
 import { CLOUD_NAME } from "@/utils/constants";
 import type { PhotoProps } from "@/utils/types";
 
+const getPhotoUrl = (publicId: string, format: string, width: number) => {
+    return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_limit,w_${width},dpr_auto,q_auto,f_auto/${publicId}.${format}`;
+};
+
 export function Photo(props: { photo: PhotoProps }): React.JSX.Element {
     const [loading, setLoading] = useState(true);
 
@@ -16,7 +20,7 @@ export function Photo(props: { photo: PhotoProps }): React.JSX.Element {
                 </div>
             ) : null}
             <Image
-                src={`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_1920,q_auto,f_auto/${props.photo.public_id}.${props.photo.format}`}
+                src={getPhotoUrl(props.photo.public_id, props.photo.format, 2560)}
                 alt={`Photo ${props.photo.id}`}
                 fill
                 priority

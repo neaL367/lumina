@@ -1,5 +1,5 @@
 import { getPhotos } from "@/lib/photos";
-import { Carousel, CarouselMain } from "@/components/carousel";
+import { Carousel } from "@/components/carousel";
 
 export default async function PhotoModalLayout(props: {
   children: React.ReactNode
@@ -9,7 +9,6 @@ export default async function PhotoModalLayout(props: {
   return (
     <Carousel photos={photos}>
       {props.children}
-      <CarouselMain />
     </Carousel>
   );
 }

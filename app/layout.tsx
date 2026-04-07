@@ -2,6 +2,7 @@ import "./globals.css";
 import { Geist } from "next/font/google";
 import { baseUrl } from "@/utils/constants";
 import type { Metadata } from "next";
+import InstallPrompt from "@/components/install-prompt";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,7 @@ export default function RootLayout(props: {
       <body>
         {props.children}
         {props.modal}
+        <InstallPrompt />
       </body>
     </html>
   );

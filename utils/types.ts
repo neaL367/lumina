@@ -11,12 +11,12 @@ export type CarouselContextType = {
   currentIndex: number;
   photos: PhotoProps[];
   loading: boolean;
-  setLoading: (loading: boolean) => void;
+  markCurrentImageLoaded: (imageId: string) => void;
   handleNext: () => void;
   handlePrev: () => void;
   closeModal: () => void;
   goToIndex: (index: number) => void;
   direction: "next" | "prev" | null;
-  isNavigatingRef: React.RefObject<boolean>;
-  pendingIndexRef: React.RefObject<number | null>;
+  isNavigatingRef: { current: boolean };
+  pendingIndexRef: { current: number | null };
 };

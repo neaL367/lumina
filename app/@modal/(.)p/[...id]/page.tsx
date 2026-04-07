@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { CarouselMain } from "@/components/carousel";
 import { getPhotoIds } from "@/lib/photos";
 
 export async function generateStaticParams() {
@@ -15,8 +16,8 @@ export async function generateStaticParams() {
 }
 
 export default async function PhotoModal(props: PageProps<"/p/[...id]">) {
-    const { id } = await props.params;
-    if (!id) return notFound();
+  const { id } = await props.params;
+  if (!id) return notFound();
 
-    return null;
+  return <CarouselMain />;
 }

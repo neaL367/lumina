@@ -9,6 +9,12 @@ import { CLOUD_NAME } from "@/utils/constants";
 import { useXScroll } from "@/hooks/use-x-scroll";
 import type { PhotoProps } from "@/utils/types";
 
+const GALLERY_CARD_SIZES = `(max-width: 640px) 280px, (max-width: 1024px) 350px, 400px`;
+
+const getGalleryImageUrl = (publicId: string, format: string, width: number, quality = `auto`) => {
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_limit,w_${width},dpr_auto,q_${quality},f_auto/${publicId}.${format}`;
+};
+
 const IntroCard = memo(function IntroCard(): React.JSX.Element {
   return (
     <div className={`row-span-1 h-full w-full rounded-2xl flex flex-col justify-center`}>
@@ -55,9 +61,9 @@ const PhotoCard = memo(function PhotoCard(props: { photo: PhotoProps; priority: 
         {/* Low-res placeholder */}
         <Image
           alt={``}
-          src={`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_50,q_10,f_auto/${props.photo.public_id}.${props.photo.format}`}
+          src={getGalleryImageUrl(props.photo.public_id, props.photo.format, 64, `10`)}
           fill
-          sizes={`(max-width: 640px) 280px, (max-width: 1024px) 350px, 400px`}
+          sizes={GALLERY_CARD_SIZES}
           className={`object-cover transition-opacity duration-700 ${isHighResLoaded ? `opacity-0 scale-105` : `opacity-100 scale-100`
             }`}
           aria-hidden={true}
@@ -66,12 +72,12 @@ const PhotoCard = memo(function PhotoCard(props: { photo: PhotoProps; priority: 
         {/* High-res image */}
         <Image
           alt={`Neal367's photo`}
-          src={`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_400,q_auto,f_auto/${props.photo.public_id}.${props.photo.format}`}
+          src={getGalleryImageUrl(props.photo.public_id, props.photo.format, 1600)}
           fill
           onLoad={() => setIsHighResLoaded(true)}
           className={`object-cover transition-all duration-700 ease-in-out hover:scale-[101.5%] hover:brightness-100 will-change-scroll ${isHighResLoaded ? `opacity-100 scale-100 blur-0` : `opacity-0 scale-95 blur-md`
             }`}
-          sizes={`280px`}
+          sizes={GALLERY_CARD_SIZES}
           priority={props.priority}
         />
       </div>
