@@ -63,6 +63,8 @@ const PhotoCard = memo(function PhotoCard(props: { photo: PhotoProps; priority: 
           alt={``}
           src={getGalleryImageUrl(props.photo.public_id, props.photo.format, 64, `10`)}
           fill
+          unoptimized
+          loading={props.priority ? `eager` : `lazy`}
           sizes={GALLERY_CARD_SIZES}
           className={`object-cover transition-opacity duration-700 ${isHighResLoaded ? `opacity-0 scale-105` : `opacity-100 scale-100`
             }`}
@@ -74,6 +76,8 @@ const PhotoCard = memo(function PhotoCard(props: { photo: PhotoProps; priority: 
           alt={`Neal367's photo`}
           src={getGalleryImageUrl(props.photo.public_id, props.photo.format, 1600)}
           fill
+          unoptimized
+          loading={props.priority ? `eager` : `lazy`}
           onLoad={() => setIsHighResLoaded(true)}
           className={`object-cover transition-all duration-700 ease-in-out hover:scale-[101.5%] hover:brightness-100 will-change-scroll ${isHighResLoaded ? `opacity-100 scale-100 blur-0` : `opacity-0 scale-95 blur-md`
             }`}

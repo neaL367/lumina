@@ -4,11 +4,12 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import {
   useEffect,
-  useState,
+  useReducer,
   useRef,
   useCallback,
   createContext,
   useMemo,
+  useTransition,
   use,
   memo,
 } from "react";
@@ -41,6 +42,8 @@ const getCloudinaryUrl = (publicId: string, format: string, width: number) => {
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_limit,w_${width},dpr_auto,q_auto,f_auto/${publicId}.${format}`;
 };
 
+const CAROUSEL_IMAGE_SIZES = `(max-width: 768px) calc(100vw - 2rem), calc(100vw - 4rem)`;
+
 const getParamPhotoId = (id: string | string[] | undefined) => {
   return Array.isArray(id) ? id.join(`/`) : id;
 };
@@ -55,11 +58,52 @@ const getIndexFromPhotoId = (photoId: string | undefined, photos: PhotoProps[]) 
   return photoId ? Math.max(0, photos.findIndex((photo) => photo.id === photoId)) : 0;
 };
 
+type CarouselState = {
+  currentIndex: number;
+  settledIndex: number;
+  direction: "next" | "prev" | null;
+};
+
+type CarouselAction =
+  | { type: "go-to"; index: number }
+  | { type: "sync-route"; index: number }
+  | { type: "mark-loaded"; index: number };
+
+function carouselReducer(state: CarouselState, action: CarouselAction): CarouselState {
+  switch (action.type) {
+    case "go-to":
+    case "sync-route":
+      if (action.index === state.currentIndex) {
+        return state;
+      }
+
+      return {
+        ...state,
+        currentIndex: action.index,
+        direction: action.index > state.currentIndex ? "next" : "prev",
+      };
+
+    case "mark-loaded":
+      if (action.index !== state.currentIndex || action.index === state.settledIndex) {
+        return state;
+      }
+
+      return {
+        ...state,
+        settledIndex: action.index,
+      };
+
+    default:
+      return state;
+  }
+}
+
 // --- Sub-components ---
 
 export const CarouselMain = memo(function CarouselMain() {
-  const { currentIndex, photos, loading, markCurrentImageLoaded, handleNext, handlePrev, direction, isNavigatingRef, pendingIndexRef } = useCarousel();
+  const { currentIndex, settledIndex, photos, loading, markCurrentImageLoaded, handleNext, handlePrev, direction } = useCarousel();
   const currentImage = photos[currentIndex];
+  const previousImage = loading ? photos[settledIndex] ?? null : null;
 
   const touchStart = useRef<number | null>(null);
   const touchEnd = useRef<number | null>(null);
@@ -96,27 +140,40 @@ export const CarouselMain = memo(function CarouselMain() {
       onTouchEnd={onTouchEnd}
     >
       <div className={`relative w-full h-full flex items-center justify-center`}>
+        {previousImage ? (
+          <Image
+            key={`settled-${previousImage.id}`}
+            src={getCloudinaryUrl(previousImage.public_id, previousImage.format, 2560)}
+            fill
+            priority
+            unoptimized
+            loading="eager"
+            placeholder={previousImage.blurDataUrl ? `blur` : `empty`}
+            blurDataURL={previousImage.blurDataUrl}
+            sizes={CAROUSEL_IMAGE_SIZES}
+            alt={`Photo ${previousImage.id}`}
+            className={`object-contain opacity-100`}
+          />
+        ) : null}
+
         <Image
-          key={currentImage.id}
+          key={`active-${currentImage.id}`}
           src={getCloudinaryUrl(currentImage.public_id, currentImage.format, 2560)}
           fill
           priority
+          unoptimized
+          loading="eager"
           placeholder={currentImage.blurDataUrl ? `blur` : `empty`}
           blurDataURL={currentImage.blurDataUrl}
-          sizes={`100vw`}
+          sizes={CAROUSEL_IMAGE_SIZES}
           alt={`Photo ${currentImage.id}`}
           onLoad={() => {
-            markCurrentImageLoaded(currentImage.id);
-            // only unlock if this load corresponds to the latest navigation
-            if (pendingIndexRef.current === null || photos[pendingIndexRef.current]?.id === currentImage.id) {
-              isNavigatingRef.current = false;
-            }
+            markCurrentImageLoaded(currentIndex);
           }}
           onError={() => {
-            markCurrentImageLoaded(currentImage.id);
-            isNavigatingRef.current = false;
+            markCurrentImageLoaded(currentIndex);
           }}
-          className={`object-contain transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1) ${loading
+          className={`object-contain transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${loading
             ? `opacity-0 ${direction === `next` ? `translate-x-8` : direction === `prev` ? `-translate-x-8` : ``}`
             : `opacity-100 translate-x-0`
             }`}
@@ -128,12 +185,13 @@ export const CarouselMain = memo(function CarouselMain() {
         const p = photos[idx];
         return p ? (
           <div key={`preload-${p.id}`} className="hidden pointer-events-none" aria-hidden="true">
-            {/* Using native img for hidden preloads to avoid Next.js overhead for non-visible elements */}
+            {/* Hidden preloads should skip the optimizer but still use Next's image component. */}
             <Image
               src={getCloudinaryUrl(p.public_id, p.format, 1600)}
               alt=""
               width={1}
               height={1}
+              unoptimized
               priority={false}
             />
           </div>
@@ -216,6 +274,7 @@ const CarouselThumbnails = memo(function CarouselThumbnails() {
             src={getCloudinaryUrl(photo.public_id, photo.format, 240)}
             alt={`thumbnail`}
             fill
+            unoptimized
             placeholder={photo.blurDataUrl ? `blur` : `empty`}
             blurDataURL={photo.blurDataUrl}
             className={`object-cover`}
@@ -270,15 +329,44 @@ export function Carousel(props: CarouselProps) {
   const router = useRouter();
   const params = useParams();
   const currentParamId = getParamPhotoId(params?.id);
-  const currentIndex = getIndexFromPhotoId(currentParamId, props.photos);
-  const [loadedImageId, setLoadedImageId] = useState<string | null>(null);
-  const [direction, setDirection] = useState<"next" | "prev" | null>(null);
-  const isNavigatingRef = useRef(false);
-  const pendingIndexRef = useRef<number | null>(null);
-  const loading = props.photos[currentIndex]?.id ? loadedImageId !== props.photos[currentIndex]?.id : false;
+  const routeIndex = getIndexFromPhotoId(currentParamId, props.photos);
+  const [state, dispatch] = useReducer(carouselReducer, {
+    currentIndex: routeIndex,
+    settledIndex: routeIndex,
+    direction: null,
+  });
+  const [, startTransition] = useTransition();
+  const currentIndexRef = useRef(routeIndex);
+  const lastParamIdRef = useRef(currentParamId);
+  const lastRequestedIndexRef = useRef(routeIndex);
+  const pendingRouteIndicesRef = useRef<Set<number>>(new Set());
+  const loading = state.settledIndex !== state.currentIndex;
 
-  const markCurrentImageLoaded = useCallback((imageId: string) => {
-    setLoadedImageId((currentLoadedImageId) => currentLoadedImageId === imageId ? currentLoadedImageId : imageId);
+  useEffect(() => {
+    currentIndexRef.current = state.currentIndex;
+  }, [state.currentIndex]);
+
+  useEffect(() => {
+    if (currentParamId === lastParamIdRef.current) {
+      return;
+    }
+
+    lastParamIdRef.current = currentParamId;
+
+    if (pendingRouteIndicesRef.current.has(routeIndex)) {
+      if (routeIndex === lastRequestedIndexRef.current) {
+        pendingRouteIndicesRef.current.clear();
+      } else {
+        pendingRouteIndicesRef.current.delete(routeIndex);
+      }
+      return;
+    }
+
+    dispatch({ type: "sync-route", index: routeIndex });
+  }, [currentParamId, routeIndex]);
+
+  const markCurrentImageLoaded = useCallback((index: number) => {
+    dispatch({ type: "mark-loaded", index });
   }, []);
 
   const closeModal = useCallback(() => {
@@ -287,30 +375,35 @@ export function Carousel(props: CarouselProps) {
 
   const goToIndex = useCallback(
     (newIndex: number) => {
-      if (newIndex === currentIndex || isNavigatingRef.current) return;
+      const previousIndex = currentIndexRef.current;
+      if (newIndex === previousIndex) return;
 
-      isNavigatingRef.current = true;
-      pendingIndexRef.current = newIndex;
+      currentIndexRef.current = newIndex;
+      lastRequestedIndexRef.current = newIndex;
+      pendingRouteIndicesRef.current.add(newIndex);
+      dispatch({ type: "go-to", index: newIndex });
 
-      setDirection(newIndex > currentIndex ? `next` : `prev`);
-
-      // Background URL update to keep history/deep-links in sync without blocking UI
-      router.replace(`/p/${newIndex + 1}`, { scroll: false });
+      // Keep the UI responsive and let the route update happen in the background.
+      startTransition(() => {
+        router.replace(`/p/${newIndex + 1}`, { scroll: false });
+      });
     },
-    [currentIndex, router]
+    [router, startTransition]
   );
 
   const handleNext = useCallback(() => {
-    if (currentIndex + 1 < props.photos.length) {
-      goToIndex(currentIndex + 1);
+    const nextIndex = currentIndexRef.current + 1;
+    if (nextIndex < props.photos.length) {
+      goToIndex(nextIndex);
     }
-  }, [currentIndex, props.photos.length, goToIndex]);
+  }, [props.photos.length, goToIndex]);
 
   const handlePrev = useCallback(() => {
-    if (currentIndex > 0) {
-      goToIndex(currentIndex - 1);
+    const prevIndex = currentIndexRef.current - 1;
+    if (prevIndex >= 0) {
+      goToIndex(prevIndex);
     }
-  }, [currentIndex, goToIndex]);
+  }, [goToIndex]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -324,7 +417,8 @@ export function Carousel(props: CarouselProps) {
 
   const contextValue = useMemo(
     () => ({
-      currentIndex,
+      currentIndex: state.currentIndex,
+      settledIndex: state.settledIndex,
       photos: props.photos,
       loading,
       markCurrentImageLoaded,
@@ -332,12 +426,11 @@ export function Carousel(props: CarouselProps) {
       handlePrev,
       closeModal,
       goToIndex,
-      direction,
-      isNavigatingRef,
-      pendingIndexRef,
+      direction: state.direction,
     }),
     [
-      currentIndex,
+      state.currentIndex,
+      state.settledIndex,
       props.photos,
       loading,
       markCurrentImageLoaded,
@@ -345,9 +438,7 @@ export function Carousel(props: CarouselProps) {
       handlePrev,
       closeModal,
       goToIndex,
-      direction,
-      isNavigatingRef,
-      pendingIndexRef,
+      state.direction,
     ]
   );
 

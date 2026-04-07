@@ -8,6 +8,7 @@ type CloudinaryResource = {
     format: string;
     height: number;
     width: number;
+    created_at: string;
 }
 
 const CLOUDINARY_FOLDER = process.env.CLOUDINARY_FOLDER;
@@ -35,6 +36,26 @@ async function getBase64ImageUrl(
     }
 }
 
+function sortResourcesByDateDesc(resources: CloudinaryResource[]): CloudinaryResource[] {
+    return [...resources].sort((a, b) => {
+        const dateDelta = Date.parse(b.created_at) - Date.parse(a.created_at);
+        if (dateDelta !== 0) {
+            return dateDelta;
+        }
+
+        return b.public_id.localeCompare(a.public_id);
+    });
+}
+
+async function getSortedPhotoResources(): Promise<CloudinaryResource[]> {
+    const results = await cloudinary.search
+        .expression(SEARCH_EXPRESSION ?? ``)
+        .sort_by(`created_at`, `desc`)
+        .max_results(400)
+        .execute();
+
+    return sortResourcesByDateDesc(results.resources as CloudinaryResource[]);
+}
 
 export async function getPhotos(withBlur = false): Promise<PhotoProps[]> {
     "use cache";
@@ -45,28 +66,25 @@ export async function getPhotos(withBlur = false): Promise<PhotoProps[]> {
     });
 
     try {
-        const results = await cloudinary.search
-            .expression(SEARCH_EXPRESSION ?? ``)
-            .sort_by(`public_id`, `desc`)
-            .max_results(400)
-            .execute();
+        const resources = await getSortedPhotoResources();
 
         let imagesWithBlurData: (string | undefined)[] = [];
         if (withBlur) {
             // Safety: only generate blurs for the top 12 to prevent timeouts
-            const resourcesToBlur = results.resources.slice(0, 12);
-            const blurImagePromises = resourcesToBlur.map((result: CloudinaryResource) => {
+            const resourcesToBlur = resources.slice(0, 12);
+            const blurImagePromises = resourcesToBlur.map((result) => {
                 return getBase64ImageUrl(result.public_id, result.format);
             });
             imagesWithBlurData = await Promise.all(blurImagePromises);
         }
 
-        return results.resources.map((result: CloudinaryResource, i: number) => ({
+        return resources.map((result, i: number) => ({
             id: result.public_id,
             height: result.height,
             width: result.width,
             public_id: result.public_id,
             format: result.format,
+            createdAt: result.created_at,
             blurDataUrl: (withBlur && i < 12) ? imagesWithBlurData[i] : undefined,
         }));
     } catch (error) {
@@ -94,6 +112,7 @@ export async function getPhotoById(id: string): Promise<PhotoProps | null> {
             width: result.width,
             public_id: result.public_id,
             format: result.format,
+            createdAt: result.created_at,
             blurDataUrl,
         };
     } catch (error) {
@@ -112,13 +131,8 @@ export async function getPhotoIds(): Promise<string[]> {
 
 
     try {
-        const results = await cloudinary.search
-            .expression(SEARCH_EXPRESSION ?? ``)
-            .sort_by(`public_id`, `desc`)
-            .max_results(400)
-            .execute();
-
-        return results.resources.map((result: { public_id: string }) => result.public_id);
+        const resources = await getSortedPhotoResources();
+        return resources.map((result) => result.public_id);
     } catch (error) {
         console.error(`Error fetching photo IDs from Cloudinary:`, error);
         return [];

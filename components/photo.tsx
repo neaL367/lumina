@@ -9,6 +9,8 @@ const getPhotoUrl = (publicId: string, format: string, width: number) => {
     return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_limit,w_${width},dpr_auto,q_auto,f_auto/${publicId}.${format}`;
 };
 
+const PHOTO_IMAGE_SIZES = `(max-width: 768px) calc(100vw - 2rem), calc(100vw - 6rem)`;
+
 export function Photo(props: { photo: PhotoProps }): React.JSX.Element {
     const [loading, setLoading] = useState(true);
 
@@ -24,10 +26,12 @@ export function Photo(props: { photo: PhotoProps }): React.JSX.Element {
                 alt={`Photo ${props.photo.id}`}
                 fill
                 priority
+                unoptimized
+                loading="eager"
                 onLoad={() => setLoading(false)}
                 className={`object-contain transition-all duration-700 ease-in-out ${loading ? `opacity-0 scale-95 blur-md` : `opacity-100 scale-100 blur-0`
                     }`}
-                sizes={`100vw`}
+                sizes={PHOTO_IMAGE_SIZES}
             />
         </div>
     );

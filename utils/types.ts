@@ -4,19 +4,19 @@ export interface PhotoProps {
   width: number;
   public_id: string;
   format: string;
+  createdAt?: string;
   blurDataUrl?: string;
 }
 
 export type CarouselContextType = {
   currentIndex: number;
+  settledIndex: number;
   photos: PhotoProps[];
   loading: boolean;
-  markCurrentImageLoaded: (imageId: string) => void;
+  markCurrentImageLoaded: (index: number) => void;
   handleNext: () => void;
   handlePrev: () => void;
   closeModal: () => void;
   goToIndex: (index: number) => void;
   direction: "next" | "prev" | null;
-  isNavigatingRef: { current: boolean };
-  pendingIndexRef: { current: number | null };
 };
