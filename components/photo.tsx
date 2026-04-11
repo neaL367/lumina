@@ -2,17 +2,14 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { CLOUD_NAME } from "@/utils/constants";
+import { cloudinaryLoader, getCloudinaryAssetPath } from "@/lib/cloudinary-images";
 import type { PhotoProps } from "@/utils/types";
-
-const getPhotoUrl = (publicId: string, format: string, width: number) => {
-    return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_limit,w_${width},dpr_auto,q_auto,f_auto/${publicId}.${format}`;
-};
 
 const PHOTO_IMAGE_SIZES = `(max-width: 768px) calc(100vw - 2rem), calc(100vw - 6rem)`;
 
 export function Photo(props: { photo: PhotoProps }): React.JSX.Element {
     const [loading, setLoading] = useState(true);
+    const assetPath = getCloudinaryAssetPath(props.photo.public_id, props.photo.format);
 
     return (
         <div className={`relative w-full h-full flex items-center justify-center`}>
@@ -22,14 +19,17 @@ export function Photo(props: { photo: PhotoProps }): React.JSX.Element {
                 </div>
             ) : null}
             <Image
-                src={getPhotoUrl(props.photo.public_id, props.photo.format, 2560)}
+                loader={cloudinaryLoader}
+                src={assetPath}
                 alt={`Photo ${props.photo.id}`}
                 fill
                 priority
-                unoptimized
                 loading="eager"
+                placeholder={props.photo.blurDataUrl ? `blur` : `empty`}
+                blurDataURL={props.photo.blurDataUrl}
                 onLoad={() => setLoading(false)}
-                className={`object-contain transition-all duration-700 ease-in-out ${loading ? `opacity-0 scale-95 blur-md` : `opacity-100 scale-100 blur-0`
+                onError={() => setLoading(false)}
+                className={`object-contain transition-[opacity,transform,filter] duration-700 ease-in-out ${loading ? `opacity-70 scale-95 blur-md` : `opacity-100 scale-100 blur-0`
                     }`}
                 sizes={PHOTO_IMAGE_SIZES}
             />

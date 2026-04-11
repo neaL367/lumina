@@ -25,8 +25,24 @@ export function useXScroll<T extends HTMLElement>(
 
     const onWheel = (e: WheelEvent) => {
       if (el.scrollWidth <= el.clientWidth) return;
+
+      // If there is already a horizontal scroll component, let the browser handle it.
+      // This is crucial for trackpads which provide native horizontal scrolling.
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = 0;
+        }
+        velocity = 0;
+        return;
+      }
+
       e.preventDefault();
-      velocity += e.deltaY * sensitivity;
+
+      const delta = e.deltaY;
+      if (delta === 0) return;
+
+      velocity += delta * sensitivity;
       if (!rafId) rafId = requestAnimationFrame(animate);
     };
 

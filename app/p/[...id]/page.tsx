@@ -1,115 +1,92 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { XIcon } from "lucide-react";
-import { getPhotoById, getPhotoIds, getPhotos } from "@/lib/photos";
-import { baseUrl, CLOUD_NAME } from "@/utils/constants";
 import { Photo } from "@/components/photo";
-import type { PhotoProps } from "@/utils/types";
-
-export async function generateStaticParams(): Promise<{ id: string[] }[]> {
-    const photoIds = await getPhotoIds();
-
-    if (!photoIds || photoIds.length === 0) {
-        return [{ id: [`__placeholder__`] }];
-    }
-
-    // Return indices for cleaner URLs
-    return photoIds.map((_, index) => ({
-        id: [(index + 1).toString()],
-    }));
-}
+import { getCloudinaryAssetPath, getCloudinaryImageUrl } from "@/lib/cloudinary-images";
+import { getPhotoByRouteParam } from "@/lib/photos";
+import { baseUrl } from "@/utils/constants";
+import {
+  getPhotoHref,
+  isCanonicalPhotoRouteParam,
+} from "@/utils/photo-paths";
 
 export async function generateMetadata(props: PageProps<"/p/[...id]">): Promise<Metadata> {
-    const { id } = await props.params;
-    const paramId = Array.isArray(id) ? id.join(`/`) : id;
+  const { id } = await props.params;
+  const currentPhoto = await getPhotoByRouteParam(id);
 
-    let currentPhoto: PhotoProps | null = null;
-    const numericIndex = parseInt(paramId, 10) - 1;
-
-    if (numericIndex >= 0) {
-        const photos = await getPhotos();
-        if (numericIndex < photos.length) {
-            currentPhoto = photos[numericIndex];
-        }
-    }
-
-    if (!currentPhoto) {
-        currentPhoto = await getPhotoById(paramId);
-    }
-
-    if (!currentPhoto) {
-        return {
-            title: `Photo Not Found`,
-        };
-    }
-
-    const imageUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_scale,w_720/${currentPhoto.public_id}.${currentPhoto.format}`;
-
+  if (!currentPhoto) {
     return {
-        title: `Neal367's photos`,
-        description: `a collection of my favorite memories.❣️`,
-
-        openGraph: {
-            title: `Neal367's photos`,
-            description: `a collection of my favorite memories.❣️`,
-            url: `${baseUrl}/p/${paramId}`,
-            images: [
-                {
-                    url: imageUrl,
-                    width: 720,
-                    alt: `Neal367's photos`,
-                },
-            ],
-        },
-
-        twitter: {
-            card: `summary_large_image`,
-            title: `Neal367's photos`,
-            description: `a collection of my favorite memories.❣️`,
-            images: [imageUrl],
-        },
+      title: `Photo Not Found`,
     };
+  }
+
+  const stableHref = getPhotoHref(currentPhoto.public_id);
+  const imageUrl = getCloudinaryImageUrl(
+    getCloudinaryAssetPath(currentPhoto.public_id, currentPhoto.format),
+    {
+      fit: `scale`,
+      width: 720,
+    }
+  );
+
+  return {
+    title: `Neal367's photos`,
+    description: `a collection of my favorite memories.โฃ๏ธ`,
+    alternates: {
+      canonical: stableHref,
+    },
+    openGraph: {
+      title: `Neal367's photos`,
+      description: `a collection of my favorite memories.โฃ๏ธ`,
+      url: `${baseUrl}${stableHref}`,
+      images: [
+        {
+          url: imageUrl,
+          width: 720,
+          alt: `Neal367's photos`,
+        },
+      ],
+    },
+    twitter: {
+      card: `summary_large_image`,
+      title: `Neal367's photos`,
+      description: `a collection of my favorite memories.โฃ๏ธ`,
+      images: [imageUrl],
+    },
+  };
 }
 
-export default async function PhotoPage(props: PageProps<"/p/[...id]">): Promise<React.JSX.Element> {
-    const { id } = await props.params;
-    const paramId = Array.isArray(id) ? id.join(`/`) : id;
+export default async function PhotoPage(
+  props: PageProps<"/p/[...id]">
+): Promise<React.JSX.Element> {
+  const { id } = await props.params;
+  const currentPhoto = await getPhotoByRouteParam(id);
 
-    let currentPhoto: PhotoProps | null = null;
-    const numericIndex = parseInt(paramId, 10) - 1;
+  if (!currentPhoto) {
+    return notFound();
+  }
 
-    if (numericIndex >= 0) {
-        const photos = await getPhotos();
-        if (numericIndex < photos.length) {
-            currentPhoto = photos[numericIndex];
-        }
-    }
+  if (!isCanonicalPhotoRouteParam(id, currentPhoto.public_id)) {
+    redirect(getPhotoHref(currentPhoto.public_id));
+  }
 
-    if (!currentPhoto) {
-        currentPhoto = await getPhotoById(paramId);
-    }
+  return (
+    <div className={`relative min-h-dvh w-full flex items-center justify-center bg-black/95 backdrop-blur-sm`}>
+      <Link
+        href={`/`}
+        className={`absolute top-5 left-5 z-50 flex items-center gap-2 rounded-full bg-zinc-800/80 p-2.5 px-4 text-white transition-colors hover:cursor-pointer hover:bg-zinc-600/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black`}
+        aria-label={`Back to gallery`}
+      >
+        <XIcon className={`w-6 h-6`} />
+        <span className={`font-medium`}>{`Back`}</span>
+      </Link>
 
-    if (!currentPhoto) {
-        return notFound();
-    }
-
-    return (
-        <div className={`relative min-h-dvh w-full flex items-center justify-center bg-black/95 backdrop-blur-sm`}>
-            <Link
-                href={`/`}
-                className={`absolute top-5 left-5 z-50 flex items-center gap-2 rounded-full bg-zinc-800/80 p-2.5 px-4 text-white transition hover:cursor-pointer hover:bg-zinc-600/80`}
-                aria-label={`Back to gallery`}
-            >
-                <XIcon className={`w-6 h-6`} />
-                <span className={`font-medium`}>{`Back`}</span>
-            </Link>
-
-            <div className={`relative w-full h-dvh flex items-center justify-center`}>
-                <div className={`relative w-full h-full p-4 md:p-12`}>
-                    <Photo photo={currentPhoto} />
-                </div>
-            </div>
+      <div className={`relative h-dvh w-full flex items-center justify-center`}>
+        <div className={`relative h-full w-full p-4 md:p-12`}>
+          <Photo photo={currentPhoto} />
         </div>
-    );
+      </div>
+    </div>
+  );
 }

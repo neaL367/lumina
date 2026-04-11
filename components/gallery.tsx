@@ -4,16 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRef, useState, memo } from "react";
 import { Github, Twitter } from "lucide-react";
-import { CLOUD_NAME } from "@/utils/constants";
-
+import { cloudinaryLoader, getCloudinaryAssetPath } from "@/lib/cloudinary-images";
 import { useXScroll } from "@/hooks/use-x-scroll";
 import type { PhotoProps } from "@/utils/types";
+import { getPhotoHref } from "@/utils/photo-paths";
 
 const GALLERY_CARD_SIZES = `(max-width: 640px) 280px, (max-width: 1024px) 350px, 400px`;
-
-const getGalleryImageUrl = (publicId: string, format: string, width: number, quality = `auto`) => {
-  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_limit,w_${width},dpr_auto,q_${quality},f_auto/${publicId}.${format}`;
-};
 
 const IntroCard = memo(function IntroCard(): React.JSX.Element {
   return (
@@ -31,7 +27,7 @@ const IntroCard = memo(function IntroCard(): React.JSX.Element {
           href={`https://github.com/neal367`}
           target={`_blank`}
           rel={`noopener noreferrer`}
-          className={`text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors`}
+          className={`text-zinc-600 transition-colors hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 dark:text-zinc-400 dark:hover:text-white dark:focus-visible:ring-white dark:focus-visible:ring-offset-black`}
         >
           <Github className={`w-5 h-5`} />
           <span className={`sr-only`}>{`GitHub`}</span>
@@ -41,7 +37,7 @@ const IntroCard = memo(function IntroCard(): React.JSX.Element {
           href={`https://twitter.com/NL367`}
           target={`_blank`}
           rel={`noopener noreferrer`}
-          className={`text-zinc-600 hover:text-blue-400 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors`}
+          className={`text-zinc-600 transition-colors hover:text-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 dark:text-zinc-400 dark:hover:text-blue-400 dark:focus-visible:ring-blue-400 dark:focus-visible:ring-offset-black`}
         >
           <Twitter className={`w-5 h-5`} />
           <span className={`sr-only`}>{`Twitter`}</span>
@@ -53,35 +49,25 @@ const IntroCard = memo(function IntroCard(): React.JSX.Element {
 
 
 const PhotoCard = memo(function PhotoCard(props: { photo: PhotoProps; priority: boolean }): React.JSX.Element {
-  const [isHighResLoaded, setIsHighResLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const assetPath = getCloudinaryAssetPath(props.photo.public_id, props.photo.format);
 
   return (
     <div className={`h-full w-full`}>
       <div className={`relative w-full h-full overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900 shadow-sm`}>
-        {/* Low-res placeholder */}
-        <Image
-          alt={``}
-          src={getGalleryImageUrl(props.photo.public_id, props.photo.format, 64, `10`)}
-          fill
-          unoptimized
-          loading={props.priority ? `eager` : `lazy`}
-          sizes={GALLERY_CARD_SIZES}
-          className={`object-cover transition-opacity duration-700 ${isHighResLoaded ? `opacity-0 scale-105` : `opacity-100 scale-100`
-            }`}
-          aria-hidden={true}
-        />
-
-        {/* High-res image */}
         <Image
           alt={`Neal367's photo`}
-          src={getGalleryImageUrl(props.photo.public_id, props.photo.format, 1600)}
+          loader={cloudinaryLoader}
+          src={assetPath}
           fill
-          unoptimized
           loading={props.priority ? `eager` : `lazy`}
-          onLoad={() => setIsHighResLoaded(true)}
-          className={`object-cover transition-all duration-700 ease-in-out hover:scale-[101.5%] hover:brightness-100 will-change-scroll ${isHighResLoaded ? `opacity-100 scale-100 blur-0` : `opacity-0 scale-95 blur-md`
-            }`}
+          placeholder={props.photo.blurDataUrl ? `blur` : `empty`}
+          blurDataURL={props.photo.blurDataUrl}
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setIsLoaded(true)}
           sizes={GALLERY_CARD_SIZES}
+          className={`object-cover transition-all duration-700 ease-in-out hover:scale-[101.5%] hover:brightness-100 will-change-scroll ${isLoaded ? `opacity-100 scale-100 blur-0` : `opacity-0 scale-[1.02] blur-md`
+            }`}
           priority={props.priority}
         />
       </div>
@@ -108,12 +94,12 @@ export function Gallery(props: { photos: PhotoProps[] }): React.JSX.Element {
         {props.photos.map((photo, index) => (
           <Link
             key={photo.id}
-            href={`/p/${index + 1}`}
-            className={`h-full block cursor-zoom-in active:scale-[0.98] transition-all animate-reveal [content-visibility:auto]`}
+            href={getPhotoHref(photo.id)}
+            className={`h-full block cursor-zoom-in animate-reveal [content-visibility:auto] transition-[transform,box-shadow] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 dark:focus-visible:ring-white dark:focus-visible:ring-offset-black`}
             style={{ animationDelay: `${(index % 12) * 50}ms` }}
             scroll={false}
           >
-            <PhotoCard photo={photo} priority={index < 4} />
+            <PhotoCard photo={photo} priority={index < 19} />
           </Link>
         ))}
       </div>
