@@ -9,7 +9,6 @@ import {
   useMemo,
   useReducer,
   useRef,
-  useTransition,
 } from "react";
 import type { CarouselContextType, PhotoProps } from "@/utils/types";
 import { getPhotoHref, getPhotoIdFromRouteParam, getPhotoIndexFromRouteParam } from "@/utils/photo-paths";
@@ -78,7 +77,6 @@ export function CarouselProvider(props: {
     settledIndex: routeIndex,
     direction: null,
   });
-  const [, startTransition] = useTransition();
   const currentIndexRef = useRef(routeIndex);
   const lastParamIdRef = useRef(currentParamId);
   const lastRequestedIndexRef = useRef(routeIndex);
@@ -212,11 +210,9 @@ export function CarouselProvider(props: {
         preloadPhoto(nextPhoto);
       }
 
-      startTransition(() => {
-        router.replace(getPhotoHref(nextPhoto.id), { scroll: false });
-      });
+      window.history.replaceState(null, "", getPhotoHref(nextPhoto.id));
     },
-    [preloadPhoto, props.photos, router, startTransition]
+    [preloadPhoto, props.photos]
   );
 
   const handleNext = useCallback(() => {
