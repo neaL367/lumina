@@ -1,6 +1,8 @@
 import type { ImageLoaderProps } from "next/image";
 import { CLOUD_NAME } from "@/utils/constants";
 
+export const CLOUDINARY_ORIGIN = `https://res.cloudinary.com`;
+
 type CloudinaryImageOptions = {
   format?: "auto" | "webp";
   fit?: "limit" | "scale";
@@ -26,7 +28,6 @@ export function getCloudinaryImageUrl(
   const transforms = [
     `c_${fit}`,
     width ? `w_${width}` : null,
-    "dpr_auto",
     `q_${quality ?? "auto"}`,
     "e_sharpen",
     `f_${format}`,

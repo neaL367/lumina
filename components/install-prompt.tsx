@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 
 const emptySubscribe = () => () => {};
 
@@ -57,7 +57,7 @@ export default function InstallPrompt(): React.JSX.Element | null {
             <button
                 type="button"
                 onClick={() => setShowPrompt(false)}
-                className="ml-4 shrink-0 p-2 text-white/50 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="ml-4 shrink-0 p-2 text-white/50 transition-colors hover:text-white cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 aria-label="Close"
             >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -4,8 +4,29 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
   typedRoutes: true,
+  cacheLife: {
+    gallery: {
+      stale: 60,
+      revalidate: 300,
+      expire: 3600,
+    },
+    photos: {
+      stale: 300,
+      revalidate: 1800,
+      expire: 86400,
+    },
+    blurData: {
+      stale: 600,
+      revalidate: 3600,
+      expire: 86400,
+    },
+  },
+  reactCompiler: {
+    compilationMode: "annotation",
+  },
   experimental: {
     inlineCss: true,
+    viewTransition: true,
     optimizePackageImports: ["lucide-react"],
   },
   images: {

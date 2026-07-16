@@ -2,7 +2,10 @@ import "./globals.css";
 import { Geist } from "next/font/google";
 import { baseUrl } from "@/utils/constants";
 import type { Metadata } from "next";
-import InstallPrompt from "@/components/install-prompt";
+import dynamic from "next/dynamic";
+import { CLOUDINARY_ORIGIN } from "@/lib/cloudinary-images";
+
+const InstallPrompt = dynamic(() => import("@/components/install-prompt"));
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,6 +51,10 @@ export default function RootLayout(props: {
 }) {
   return (
     <html lang="en" className={`${geistSans.className} antialiased`}>
+      <head>
+        <link rel="preconnect" href={CLOUDINARY_ORIGIN} />
+        <link rel="dns-prefetch" href={CLOUDINARY_ORIGIN} />
+      </head>
       <body>
         {props.children}
         <InstallPrompt />

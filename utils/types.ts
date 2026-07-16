@@ -9,11 +9,9 @@ export interface PhotoProps {
 
 export interface Keyframe {
   diff: number;
-  x: number;      // translation in vw
-  y: number;      // translation in vh
+  x: number;
+  y: number;
   scale: number;
   opacity: number;
-  blur: number;   // CSS filter blur in px
-  rotate: number; // rotation in deg
-  grayscale: number; // grayscale amount in %
+  rotate: number;
 }

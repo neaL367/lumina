@@ -80,13 +80,6 @@ export function isLegacyPhotoIndexParam(photoId: string | undefined): boolean {
   return Boolean(photoId && /^\d+$/.test(photoId));
 }
 
-export function isCanonicalPhotoRouteParam(
-  routeParam: PhotoRouteParam,
-  publicId: string
-): boolean {
-  return getPhotoIdFromRouteParam(routeParam)?.toLowerCase() === getPhotoRoutePath(publicId);
-}
-
 export function doesPhotoRouteParamMatch(
   routeParam: PhotoRouteParam,
   publicId: string
@@ -111,23 +104,4 @@ export function findPhotoByRouteParam(
   return photos.find((photo) => doesPhotoRouteParamMatch(routeParam, photo.publicId));
 }
 
-export function getPhotoIndexFromRouteParam(
-  routeParam: PhotoRouteParam,
-  photos: PhotoProps[]
-): number {
-  const photoId = getPhotoIdFromRouteParam(routeParam);
 
-  if (!photoId) {
-    return 0;
-  }
-
-  if (isLegacyPhotoIndexParam(photoId)) {
-    const numericIndex = Number.parseInt(photoId, 10) - 1;
-    if (numericIndex >= 0 && numericIndex < photos.length) {
-      return numericIndex;
-    }
-  }
-
-  const stableIndex = photos.findIndex((photo) => doesPhotoRouteParamMatch(routeParam, photo.publicId));
-  return stableIndex >= 0 ? stableIndex : 0;
-}

@@ -1,9 +1,19 @@
 @import "tailwindcss";
 
+@view-transition {
+   navigation: auto;
+}
+
+@media (prefers-reduced-motion) {
+  @view-transition {
+    navigation: none;
+  }
+}
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --duration-move: 400ms;
   color-scheme: light;
 }
 
@@ -25,7 +35,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   margin: 0 auto;
-  scroll-behavior: smooth;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -39,18 +48,49 @@ html, body {
   scrollbar-width: none;  /* Firefox */
 }
 
-@keyframes reveal {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
+::view-transition-group(.photo-morph) {
+  animation-duration: var(--duration-move);
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+::view-transition-image-pair(.photo-morph) {
+  animation: 400ms via-blur;
+}
 
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+@keyframes via-blur {
+  30% {
+    filter: blur(3px);
   }
 }
 
-.animate-reveal {
-  animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+::view-transition-old(.nav-forward) {
+  animation: var(--duration-move) cubic-bezier(0.4, 0, 0.2, 1) both slide-out-left;
+}
+::view-transition-new(.nav-forward) {
+  animation: var(--duration-move) cubic-bezier(0.4, 0, 0.2, 1) both slide-in-right;
+}
+
+::view-transition-old(.nav-back) {
+  animation: var(--duration-move) cubic-bezier(0.4, 0, 0.2, 1) both slide-out-right;
+}
+::view-transition-new(.nav-back) {
+  animation: var(--duration-move) cubic-bezier(0.4, 0, 0.2, 1) both slide-in-left;
+}
+
+@keyframes slide-out-left {
+  to { translate: -30% 0; opacity: 0; }
+}
+@keyframes slide-in-right {
+  from { translate: 30% 0; opacity: 0; }
+}
+@keyframes slide-out-right {
+  to { translate: 30% 0; opacity: 0; }
+}
+@keyframes slide-in-left {
+  from { translate: -30% 0; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*), ::view-transition-new(*), ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
 }

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cacheLife } from "next/cache";
 import cloudinary from "./cloudinary";
 import { getCloudinaryAssetPath } from "@/lib/cloudinary-images";
@@ -26,12 +27,16 @@ type SearchResults = {
 const CLOUDINARY_FOLDER = process.env.CLOUDINARY_FOLDER;
 const SEARCH_EXPRESSION = CLOUDINARY_FOLDER ? `folder:${CLOUDINARY_FOLDER}/*` : ``;
 const CLOUDINARY_SEARCH_PAGE_SIZE = 500;
+const CLOUDINARY_MAX_PAGES = 4;
 const BLUR_DATA_LIMIT = 12;
 
 async function getBase64ImageUrl(
     imageId: string,
     format: string
 ): Promise<string | undefined> {
+    "use cache";
+    cacheLife('blurData');
+
     try {
         const response = await fetch(
             `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/w_100,e_blur:1000,q_auto,f_webp/${getCloudinaryAssetPath(imageId, format)}`
@@ -61,9 +66,10 @@ function sortResourcesByDateDesc(resources: CloudinaryResource[]): CloudinaryRes
     });
 }
 
-async function getSortedPhotoResources(): Promise<CloudinaryResource[]> {
+const getSortedPhotoResources = cache(async function getSortedPhotoResources(): Promise<CloudinaryResource[]> {
     const resources: CloudinaryResource[] = [];
     let nextCursor: string | undefined;
+    let pageCount = 0;
 
     do {
         const search = cloudinary.search
@@ -79,25 +85,25 @@ async function getSortedPhotoResources(): Promise<CloudinaryResource[]> {
 
         resources.push(...results.resources);
         nextCursor = results.next_cursor;
-    } while (nextCursor);
+        pageCount++;
+    } while (nextCursor && pageCount < CLOUDINARY_MAX_PAGES);
 
     return sortResourcesByDateDesc(resources);
-}
+});
 
 export async function getPhotos(withBlur = false): Promise<PhotoProps[]> {
     "use cache";
-    cacheLife({
-        stale: 3600,
-        revalidate: 900,
-        expire: 86400,
-    });
+    cacheLife('gallery');
 
     try {
         const resources = await getSortedPhotoResources();
 
+        if (resources.length === 0) {
+            console.warn("No photos found in Cloudinary folder");
+        }
+
         let imagesWithBlurData: (string | undefined)[] = [];
         if (withBlur) {
-            // Safety: only generate blurs for the top rows to prevent timeouts on large galleries
             const resourcesToBlur = resources.slice(0, BLUR_DATA_LIMIT);
             const blurImageUrls: string[] = resourcesToBlur.map((result) => {
                 return getCloudinaryAssetPath(result.public_id, result.format);
@@ -128,11 +134,7 @@ export async function getPhotos(withBlur = false): Promise<PhotoProps[]> {
 
 export async function getPhotoById(id: string): Promise<PhotoProps | null> {
     "use cache";
-    cacheLife({
-        stale: 3600,
-        revalidate: 900,
-        expire: 86400,
-    });
+    cacheLife('photos');
 
 
     try {
@@ -155,11 +157,7 @@ export async function getPhotoById(id: string): Promise<PhotoProps | null> {
 
 export async function getPhotoByRouteParam(routeParam: PhotoRouteParam): Promise<PhotoProps | null> {
     "use cache";
-    cacheLife({
-        stale: 3600,
-        revalidate: 900,
-        expire: 86400,
-    });
+    cacheLife('photos');
 
     const photoId = getPhotoIdFromRouteParam(routeParam);
     if (!photoId) {
