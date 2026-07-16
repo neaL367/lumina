@@ -46,8 +46,8 @@ export const PhotoCard = memo(function PhotoCard(props: { photo: PhotoProps; pri
           priority={props.priority}
         />
         
-        {/* Procedural Film Grain Overlay */}
-        <svg className="pointer-events-none absolute inset-0 w-full h-full opacity-[0.05] dark:opacity-[0.08] mix-blend-overlay z-10" xmlns="http://www.w3.org/2000/svg">
+        {/* Procedural Film Grain Overlay - Hidden on mobile to optimize GPU performance */}
+        <svg className="pointer-events-none absolute inset-0 w-full h-full opacity-[0.05] dark:opacity-[0.08] mix-blend-overlay z-10 hidden md:block" xmlns="http://www.w3.org/2000/svg">
           <filter id="noiseFilter">
             <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
           </filter>

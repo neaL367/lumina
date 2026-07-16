@@ -14,11 +14,11 @@ const KEYFRAMES_DESKTOP: Keyframe[] = [
 ];
 
 const KEYFRAMES_MOBILE: Keyframe[] = [
-  { diff: -2.0, x: 50, y: 70, scale: 0.65, opacity: 0, blur: 15, rotate: 4, grayscale: 100 },
-  { diff: -1.0, x: 25, y: 35, scale: 0.85, opacity: 0.25, blur: 8, rotate: 2, grayscale: 100 },
+  { diff: -2.0, x: 50, y: 70, scale: 0.65, opacity: 0, blur: 0, rotate: 4, grayscale: 100 },
+  { diff: -1.0, x: 25, y: 35, scale: 0.85, opacity: 0.25, blur: 0, rotate: 2, grayscale: 100 },
   { diff: 0.0, x: 0, y: 0, scale: 1.12, opacity: 1, blur: 0, rotate: 0, grayscale: 0 },
-  { diff: 1.0, x: -25, y: -35, scale: 0.85, opacity: 0.3, blur: 8, rotate: -2, grayscale: 100 },
-  { diff: 2.0, x: -50, y: -70, scale: 0.65, opacity: 0, blur: 15, rotate: -4, grayscale: 100 },
+  { diff: 1.0, x: -25, y: -35, scale: 0.85, opacity: 0.3, blur: 0, rotate: -2, grayscale: 100 },
+  { diff: 2.0, x: -50, y: -70, scale: 0.65, opacity: 0, blur: 0, rotate: -4, grayscale: 100 },
 ];
 
 function getInterpolatedStyle(diff: number, excludeGrayscale = false, isMobile = false) {
