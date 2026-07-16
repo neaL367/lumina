@@ -65,7 +65,7 @@ function getPhotoRouteToken(publicId: string): string {
 }
 
 export function getPhotoRoutePath(publicId: string): string {
-  return getPhotoRouteToken(publicId);
+  return getPhotoRouteToken(publicId).toLowerCase();
 }
 
 export function getPhotoRouteSegments(publicId: string): string[] {
@@ -84,7 +84,7 @@ export function isCanonicalPhotoRouteParam(
   routeParam: PhotoRouteParam,
   publicId: string
 ): boolean {
-  return getPhotoIdFromRouteParam(routeParam) === getPhotoRoutePath(publicId);
+  return getPhotoIdFromRouteParam(routeParam)?.toLowerCase() === getPhotoRoutePath(publicId);
 }
 
 export function doesPhotoRouteParamMatch(
@@ -98,7 +98,7 @@ export function doesPhotoRouteParamMatch(
   }
 
   return (
-    routeValue === publicId ||
+    routeValue.toLowerCase() === publicId.toLowerCase() ||
     routeValue === getPhotoRoutePath(publicId) ||
     routeValue === getLegacyPhotoRoutePath(publicId)
   );
@@ -108,7 +108,7 @@ export function findPhotoByRouteParam(
   routeParam: PhotoRouteParam,
   photos: PhotoProps[]
 ): PhotoProps | undefined {
-  return photos.find((photo) => doesPhotoRouteParamMatch(routeParam, photo.id));
+  return photos.find((photo) => doesPhotoRouteParamMatch(routeParam, photo.publicId));
 }
 
 export function getPhotoIndexFromRouteParam(
@@ -128,6 +128,6 @@ export function getPhotoIndexFromRouteParam(
     }
   }
 
-  const stableIndex = photos.findIndex((photo) => doesPhotoRouteParamMatch(routeParam, photo.id));
+  const stableIndex = photos.findIndex((photo) => doesPhotoRouteParamMatch(routeParam, photo.publicId));
   return stableIndex >= 0 ? stableIndex : 0;
 }

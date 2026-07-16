@@ -51,5 +51,5 @@ export function useXScroll<T extends HTMLElement>(
       el.removeEventListener("wheel", onWheel);
       cancelAnimationFrame(rafId);
     };
-  }, [ref, friction, sensitivity, minVelocity]);
+  }, [ref]);
 }

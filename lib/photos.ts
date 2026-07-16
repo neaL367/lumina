@@ -99,17 +99,23 @@ export async function getPhotos(withBlur = false): Promise<PhotoProps[]> {
         if (withBlur) {
             // Safety: only generate blurs for the top rows to prevent timeouts on large galleries
             const resourcesToBlur = resources.slice(0, BLUR_DATA_LIMIT);
-            const blurImagePromises = resourcesToBlur.map((result) => {
-                return getBase64ImageUrl(result.public_id, result.format);
+            const blurImageUrls: string[] = resourcesToBlur.map((result) => {
+                return getCloudinaryAssetPath(result.public_id, result.format);
+            });
+            const blurImagePromises = blurImageUrls.map((url) => {
+                const match = url.match(/upload\/([^\/]+)\.(.+)$/);
+                if (!match) {
+                    return undefined;
+                }
+                return getBase64ImageUrl(match[1], match[2]);
             });
             imagesWithBlurData = await Promise.all(blurImagePromises);
         }
 
         return resources.map((result, i: number) => ({
-            id: result.public_id,
+            publicId: result.public_id,
             height: result.height,
             width: result.width,
-            public_id: result.public_id,
             format: result.format,
             createdAt: result.created_at,
             blurDataUrl: (withBlur && i < BLUR_DATA_LIMIT) ? imagesWithBlurData[i] : undefined,
@@ -134,10 +140,9 @@ export async function getPhotoById(id: string): Promise<PhotoProps | null> {
         const blurDataUrl = await getBase64ImageUrl(result.public_id, result.format);
 
         return {
-            id: result.public_id,
+            publicId: result.public_id,
             height: result.height,
             width: result.width,
-            public_id: result.public_id,
             format: result.format,
             createdAt: result.created_at,
             blurDataUrl,
@@ -161,17 +166,16 @@ export async function getPhotoByRouteParam(routeParam: PhotoRouteParam): Promise
         return null;
     }
 
+    const photos = await getPhotos();
+    
     if (isLegacyPhotoIndexParam(photoId)) {
         const numericIndex = Number.parseInt(photoId, 10) - 1;
         if (numericIndex < 0) {
             return null;
         }
-
-        const photos = await getPhotos();
         return photos[numericIndex] ?? null;
     }
 
-    const photos = await getPhotos();
     const matchedPhoto = findPhotoByRouteParam(routeParam, photos);
     if (matchedPhoto) {
         return matchedPhoto;
