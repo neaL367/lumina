@@ -28,6 +28,7 @@ export function getCloudinaryImageUrl(
     width ? `w_${width}` : null,
     "dpr_auto",
     `q_${quality ?? "auto"}`,
+    "e_sharpen",
     `f_${format}`,
   ]
     .filter(Boolean)
