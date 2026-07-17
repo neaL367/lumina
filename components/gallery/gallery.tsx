@@ -1,10 +1,12 @@
 "use client";
 
+import { ViewTransition } from "react";
 import type { PhotoProps } from "@/utils/types";
 import { IntroCard } from "./intro-card";
 import { PhotoCard } from "./photo-card";
 import { useGallery, CARD_SPACING_PX } from "@/hooks/use-gallery";
 import { GalleryFilter } from "./gallery-filter";
+import { getPhotoRoutePath } from "@/utils/photo-paths";
 
 function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
   const {
@@ -75,37 +77,66 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
           const isFocused = Math.abs(diff) < 0.05;
           const key = item.type === "intro" ? "intro" : item.photo.publicId;
 
-          return (
-            <div
-              key={key}
-              data-key={key}
-              data-gallery-card="true"
-              ref={(el) => {
-                if (el) elMapRef.current.set(key, el);
-                else elMapRef.current.delete(key);
-              }}
-              onClick={(e) => handleCardClick(e, index)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  e.stopPropagation(); // prevent window-level ArrowDown/Space handler from also firing
-                  handleCardClick(e as unknown as React.MouseEvent<HTMLDivElement>, index);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              className={`absolute left-1/2 top-1/2 ${index > 0 ? "cursor-pointer" : ""} will-change-transform select-none ${
-                isLandscape
-                  ? "w-[90vw] max-w-[340px] sm:max-w-[440px] md:max-w-[540px] lg:max-w-[620px] aspect-[3/2]"
-                  : "w-[70vw] max-w-[260px] sm:max-w-[320px] md:max-w-[380px] lg:max-w-[420px] aspect-[3/4]"
-              }`}
-            >
-              {item.type === "intro" ? (
+          if (item.type === "intro") {
+            return (
+              <div
+                key={key}
+                data-key={key}
+                data-gallery-card="true"
+                ref={(el) => {
+                  if (el) elMapRef.current.set(key, el);
+                  else elMapRef.current.delete(key);
+                }}
+                onClick={(e) => handleCardClick(e, index)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleCardClick(e as unknown as React.MouseEvent<HTMLDivElement>, index);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                className={`absolute left-1/2 top-1/2 will-change-transform select-none ${
+                  isLandscape
+                    ? "w-[90vw] max-w-[340px] sm:max-w-[440px] md:max-w-[540px] lg:max-w-[620px] aspect-[3/2]"
+                    : "w-[70vw] max-w-[260px] sm:max-w-[320px] md:max-w-[380px] lg:max-w-[420px] aspect-[3/4]"
+                }`}
+              >
                 <IntroCard />
-              ) : (
+              </div>
+            );
+          }
+
+          return (
+            <ViewTransition key={key} name={`photo-${getPhotoRoutePath(item.photo.publicId)}`} share="photo-morph">
+              <div
+                key={key}
+                data-key={key}
+                data-gallery-card="true"
+                ref={(el) => {
+                  if (el) elMapRef.current.set(key, el);
+                  else elMapRef.current.delete(key);
+                }}
+                onClick={(e) => handleCardClick(e, index)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleCardClick(e as unknown as React.MouseEvent<HTMLDivElement>, index);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                className={`absolute left-1/2 top-1/2 cursor-pointer will-change-transform select-none ${
+                  isLandscape
+                    ? "w-[90vw] max-w-[340px] sm:max-w-[440px] md:max-w-[540px] lg:max-w-[620px] aspect-[3/2]"
+                    : "w-[70vw] max-w-[260px] sm:max-w-[320px] md:max-w-[380px] lg:max-w-[420px] aspect-[3/4]"
+                }`}
+              >
                 <PhotoCard photo={item.photo} eager={index < 4} isFocused={isFocused} />
-              )}
-            </div>
+              </div>
+            </ViewTransition>
           );
         })}
 

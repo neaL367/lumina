@@ -1,15 +1,5 @@
 @import "tailwindcss";
 
-@view-transition {
-   navigation: auto;
-}
-
-@media (prefers-reduced-motion) {
-  @view-transition {
-    navigation: none;
-  }
-}
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -31,6 +21,12 @@
   }
 }
 
+@supports (scrollbar-gutter: stable) {
+  body {
+    scrollbar-gutter: stable both-edges;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -48,49 +44,47 @@ html, body {
   scrollbar-width: none;  /* Firefox */
 }
 
+@keyframes reveal {
+  0% {
+    opacity: 0;
+  }
+}
+
+::view-transition-group(.page-enter) {
+  animation-duration: 250ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-group(.page-exit) {
+  animation-duration: 100ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-new(.page-enter) {
+  animation-name: reveal;
+}
+
+::view-transition-old(.page-exit) {
+  animation-name: reveal;
+  animation-direction: reverse;
+}
+
+/* util for faster than default (250ms) transitions. Typically used to make exits faster so they don't visually overlap with enters */
+::view-transition-group(.duration-100) {
+  animation-duration: 100ms;
+}
+
+/* using ::view-transition-image-pair and not ::view-transition-group to preserve the default animation's automatic scale and position morphing */
+::view-transition-image-pair(*) {
+  isolation: isolate;
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+  mix-blend-mode: normal;
+}
+
 ::view-transition-group(.photo-morph) {
-  animation-duration: var(--duration-move);
+  animation-duration: 380ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-::view-transition-image-pair(.photo-morph) {
-  animation: 400ms via-blur;
-}
-
-@keyframes via-blur {
-  30% {
-    filter: blur(3px);
-  }
-}
-
-::view-transition-old(.nav-forward) {
-  animation: var(--duration-move) cubic-bezier(0.4, 0, 0.2, 1) both slide-out-left;
-}
-::view-transition-new(.nav-forward) {
-  animation: var(--duration-move) cubic-bezier(0.4, 0, 0.2, 1) both slide-in-right;
-}
-
-::view-transition-old(.nav-back) {
-  animation: var(--duration-move) cubic-bezier(0.4, 0, 0.2, 1) both slide-out-right;
-}
-::view-transition-new(.nav-back) {
-  animation: var(--duration-move) cubic-bezier(0.4, 0, 0.2, 1) both slide-in-left;
-}
-
-@keyframes slide-out-left {
-  to { translate: -30% 0; opacity: 0; }
-}
-@keyframes slide-in-right {
-  from { translate: 30% 0; opacity: 0; }
-}
-@keyframes slide-out-right {
-  to { translate: 30% 0; opacity: 0; }
-}
-@keyframes slide-in-left {
-  from { translate: -30% 0; opacity: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(*), ::view-transition-new(*), ::view-transition-group(*) {
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
-  }
 }

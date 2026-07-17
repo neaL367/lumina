@@ -20,11 +20,7 @@ async function GalleryContent() {
 export default async function Home(): Promise<React.JSX.Element> {
   return (
     <main className="w-full min-h-dvh bg-[#f3f3f3] dark:bg-zinc-950">
-      <ViewTransition
-        exit={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
-        enter={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
-        default="none"
-      >
+      <ViewTransition enter="page-enter" exit="page-exit duration-100">
         <Suspense fallback={<GallerySkeleton />}>
           <GalleryContent />
         </Suspense>
