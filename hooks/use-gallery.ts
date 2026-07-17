@@ -122,6 +122,8 @@ export function useGallery(photos: PhotoProps[]) {
     }
   }, [onScrollUpdate]);
 
+
+
   // --- DOM Sync Layout Effect ---
   // Coordinates transforms/opacity writes directly to DOM at native refresh rate
   useLayoutEffect(() => {

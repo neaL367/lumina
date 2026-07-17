@@ -61,6 +61,6 @@ export function getInterpolatedStyle(diff: number, isMobile = false) {
     transform: `translate3d(calc(${x}vw - 50%), calc(${y}vh - 50%), 0) scale(${scale}) rotate(${rotate}deg)`,
     opacity,
     zIndex: Math.round((1 - absDiff) * 10) + 10,
-    pointerEvents: absDiff > 0.5 ? ("none" as const) : ("auto" as const),
+    pointerEvents: absDiff > 1.5 ? ("none" as const) : ("auto" as const),
   };
 }
