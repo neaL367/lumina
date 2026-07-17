@@ -105,15 +105,8 @@ export async function getPhotos(withBlur = false): Promise<PhotoProps[]> {
         let imagesWithBlurData: (string | undefined)[] = [];
         if (withBlur) {
             const resourcesToBlur = resources.slice(0, BLUR_DATA_LIMIT);
-            const blurImageUrls: string[] = resourcesToBlur.map((result) => {
-                return getCloudinaryAssetPath(result.public_id, result.format);
-            });
-            const blurImagePromises = blurImageUrls.map((url) => {
-                const match = url.match(/upload\/([^\/]+)\.(.+)$/);
-                if (!match) {
-                    return undefined;
-                }
-                return getBase64ImageUrl(match[1], match[2]);
+            const blurImagePromises = resourcesToBlur.map((result) => {
+                return getBase64ImageUrl(result.public_id, result.format);
             });
             imagesWithBlurData = await Promise.all(blurImagePromises);
         }

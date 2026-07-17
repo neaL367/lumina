@@ -1,6 +1,5 @@
 "use client";
 
-import { ViewTransition } from "react";
 import Image from "next/image";
 import { cloudinaryLoader, getCloudinaryAssetPath } from "@/lib/cloudinary-images";
 import type { PhotoProps } from "@/utils/types";

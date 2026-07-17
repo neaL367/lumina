@@ -4,11 +4,11 @@ import Link from "next/link";
 import { cacheLife } from "next/cache";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { getCloudinaryAssetPath, getCloudinaryImageUrl } from "@/lib/cloudinary-images";
-import { getPhotoByRouteParam } from "@/lib/photos";
+import { getPhotoByRouteParam, getPhotos } from "@/lib/photos";
 import { CloudinaryImage } from "@/components/cloudinary-image";
-import { StoreScrollIndex } from "@/components/store-scroll-index";
 import { PhotoSkeleton } from "@/components/gallery-skeleton";
 import type { PhotoProps } from "@/utils/types";
+import { getPhotoRoutePath } from "@/utils/photo-paths";
 
 async function PhotoContent({ params }: { params: Promise<{ id: string[] }> }) {
   const { id } = await params;
@@ -74,32 +74,20 @@ function PhotoDisplay({ photo }: { photo: PhotoProps }) {
   );
 }
 
+export async function generateStaticParams() {
+  const photos = await getPhotos();
+  return photos.map((photo) => ({
+    id: [getPhotoRoutePath(photo.publicId)],
+  }));
+}
+
 export default async function PhotoPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string[] }>;
-  searchParams: Promise<{ from?: string }>;
 }) {
   return (
     <Suspense fallback={<PhotoSkeleton />}>
-      <PhotoPageInner params={params} searchParams={searchParams} />
-    </Suspense>
-  );
-}
-
-async function PhotoPageInner({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string[] }>;
-  searchParams: Promise<{ from?: string }>;
-}) {
-  const { from } = await searchParams;
-
-  return (
-    <>
-      <StoreScrollIndex from={from} />
       <ViewTransition
         enter={{
           "nav-forward": "nav-forward",
@@ -117,6 +105,6 @@ async function PhotoPageInner({
           <PhotoContent params={params} />
         </Suspense>
       </ViewTransition>
-    </>
+    </Suspense>
   );
 }

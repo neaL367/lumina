@@ -1,10 +1,9 @@
 "use client";
 
-import { Lenis as LenisProvider } from "lenis/react";
 import type { PhotoProps } from "@/utils/types";
 import { IntroCard } from "./intro-card";
 import { PhotoCard } from "./photo-card";
-import { useGallery } from "@/hooks/use-gallery";
+import { useGallery, CARD_SPACING_PX } from "@/hooks/use-gallery";
 import { GalleryFilter } from "./gallery-filter";
 
 function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
@@ -19,6 +18,8 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
     p,
     vh,
     elMapRef,
+    scrollContainerRef,
+    handleScroll,
     handleFilterChange,
     handleCardClick,
     handlePrev,
@@ -27,9 +28,28 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
 
   return (
     <div
-      className="relative w-full"
-      style={{ height: vh ? `${(items.length - 1) * 800 + vh}px` : `${items.length * 100}vh` }}
+      ref={scrollContainerRef}
+      onScroll={handleScroll}
+      className="relative w-full h-dvh overflow-y-auto snap-y snap-mandatory no-scrollbar"
     >
+      {/* Invisible Snap Points */}
+      <div
+        className="absolute top-0 left-0 w-full pointer-events-none"
+        style={{ height: vh ? `${(items.length - 1) * CARD_SPACING_PX + vh}px` : `${items.length * 100}vh` }}
+      >
+        {items.map((_, index) => (
+          <div
+            key={`snap-${index}`}
+            className="absolute w-full h-[1px]"
+            style={{
+              top: `${index * CARD_SPACING_PX}px`,
+              scrollSnapAlign: "start",
+              scrollSnapStop: "always",
+            }}
+          />
+        ))}
+      </div>
+
       {/* Floating Date Filter Pill */}
       <GalleryFilter
         selectedYear={selectedYear}
@@ -65,6 +85,7 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
+                  e.stopPropagation(); // prevent window-level ArrowDown/Space handler from also firing
                   handleCardClick(e as unknown as React.MouseEvent<HTMLDivElement>, index);
                 }
               }}
@@ -97,7 +118,7 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
             <div className="relative w-20 sm:w-28 h-[2px] bg-zinc-300/50 dark:bg-zinc-800/55 overflow-hidden rounded-full">
               <div
                 className="absolute top-0 left-0 h-full bg-zinc-950 dark:bg-white"
-                style={{ width: `${(p / (items.length - 1)) * 100}%` }}
+                style={{ width: `${items.length > 1 ? (p / (items.length - 1)) * 100 : 0}%` }}
               />
             </div>
           </div>
@@ -134,9 +155,5 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
 }
 
 export function Gallery(props: { photos: PhotoProps[] }): React.JSX.Element {
-  return (
-    <LenisProvider root options={{ lerp: 0.2, duration: 0.6, wheelMultiplier: 1.0 }}>
-      <GalleryInner photos={props.photos} />
-    </LenisProvider>
-  );
+  return <GalleryInner photos={props.photos} />;
 }

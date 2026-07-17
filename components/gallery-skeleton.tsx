@@ -1,4 +1,3 @@
-"use client";
 
 function CardSkeleton({ className = "" }: { className?: string }) {
   return (

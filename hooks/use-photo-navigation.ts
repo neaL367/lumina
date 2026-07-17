@@ -48,7 +48,7 @@ export function usePhotoNavigation(photos: PhotoProps[]) {
       } catch {
         // sessionStorage may be unavailable in private browsing
       }
-      router.push(`${href}?from=${index}` as Route, { transitionTypes: ["nav-forward"] });
+      router.push(href as Route, { transitionTypes: ["nav-forward"] });
     },
     [router, getPhotoHrefForIndex]
   );

@@ -1,9 +1,10 @@
 import { useRef, useState, useCallback, useEffect, useLayoutEffect, useMemo, startTransition } from "react";
 import { usePathname } from "next/navigation";
-import { useLenisScroll } from "@/hooks/use-lenis-scroll";
 import { usePhotoNavigation } from "@/hooks/use-photo-navigation";
 import { getInterpolatedStyle } from "@/components/gallery/interpolation";
 import type { PhotoProps } from "@/utils/types";
+
+export const CARD_SPACING_PX = 800;
 
 export function useGallery(photos: PhotoProps[]) {
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
@@ -13,14 +14,6 @@ export function useGallery(photos: PhotoProps[]) {
   const pathname = usePathname();
   const restoreDoneRef = useRef(false);
   const lastPathnameRef = useRef(pathname);
-
-  // Synchronously reset restore state on navigation back to homepage
-  if (pathname !== lastPathnameRef.current) {
-    lastPathnameRef.current = pathname;
-    if (pathname === "/") {
-      restoreDoneRef.current = false;
-    }
-  }
 
   const years = useMemo(() => {
     const uniqueYears = new Set<string>();
@@ -61,7 +54,6 @@ export function useGallery(photos: PhotoProps[]) {
     });
   }, [photos, selectedYear, selectedMonth]);
 
-  'use memo'
   const items = useMemo(() => [
     { type: "intro" as const },
     ...filteredPhotos.map((photo) => ({ type: "photo" as const, photo })),
@@ -77,12 +69,44 @@ export function useGallery(photos: PhotoProps[]) {
   const elMapRef = useRef(new Map<string, HTMLDivElement>());
   const isMobileRef = useRef(false);
 
-  const { scrollTo, snapToNext, snapToPrev, onScroll, lenisRef } = useLenisScroll(items.length);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const { navigateToPhoto, onScrollUpdate } = usePhotoNavigation(filteredPhotos);
+
+  const scrollTo = useCallback((index: number, immediate = false) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const clampedIndex = Math.max(0, Math.min(items.length - 1, index));
+    el.scrollTo({
+      top: clampedIndex * CARD_SPACING_PX,
+      behavior: immediate ? "instant" : "smooth" as ScrollBehavior
+    });
+  }, [items.length]);
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    if (blockScrollRef.current) return;
+    const scrollTop = e.currentTarget.scrollTop;
+    const currentP = scrollTop / CARD_SPACING_PX;
+    pRef.current = currentP;
+    targetIndexRef.current = Math.round(currentP); // keep target in sync with real scroll position
+    onScrollUpdate(currentP);
+    const now = performance.now();
+    if (now - lastRenderRef.current > 16) {
+      lastRenderRef.current = now;
+      setP(currentP);
+    }
+  }, [onScrollUpdate]);
 
   // Animation loop — writes transforms/opacity directly to DOM at native refresh rate
   useLayoutEffect(() => {
     const elMap = elMapRef.current;
+
+    // Reset restore state on navigation back to homepage
+    if (pathname !== lastPathnameRef.current) {
+      lastPathnameRef.current = pathname;
+      if (pathname === "/") {
+        restoreDoneRef.current = false;
+      }
+    }
 
     const tryRestore = () => {
       if (restoreDoneRef.current) return;
@@ -93,8 +117,8 @@ export function useGallery(photos: PhotoProps[]) {
         const parsed = parseInt(stored, 10);
         if (isNaN(parsed) || parsed <= 0) return;
 
-        const lenis = lenisRef.current;
-        if (!lenis) return;
+        const el = scrollContainerRef.current;
+        if (!el) return;
 
         // Restore filters first
         const storedYear = sessionStorage.getItem("galleryScrollYear");
@@ -121,7 +145,8 @@ export function useGallery(photos: PhotoProps[]) {
         sessionStorage.removeItem("galleryScrollIndex");
         sessionStorage.removeItem("galleryScrollYear");
         sessionStorage.removeItem("galleryScrollMonth");
-        lenis.scrollTo(clamped * 800, { immediate: true });
+        
+        el.scrollTop = clamped * CARD_SPACING_PX;
         setP(clamped);
         setTimeout(() => {
           blockScrollRef.current = false;
@@ -149,18 +174,25 @@ export function useGallery(photos: PhotoProps[]) {
     // Synchronous initial sync before first paint
     tryRestore();
     for (let i = 0; i < items.length; i++) {
-      const key = i === 0 ? "intro" : filteredPhotos[i - 1].publicId;
+      const item = items[i];
+      const key = item.type === "intro" ? "intro" : item.photo.publicId;
       const el = elMap.get(key);
       if (el) updateItem(el, i);
     }
 
+    let lastP = -999;
     let rafId: number;
     const tick = () => {
       tryRestore();
-      for (let i = 0; i < items.length; i++) {
-        const key = i === 0 ? "intro" : filteredPhotos[i - 1].publicId;
-        const el = elMap.get(key);
-        if (el && el.isConnected) updateItem(el, i);
+      const currentP = pRef.current;
+      if (currentP !== lastP) {
+        lastP = currentP;
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const key = item.type === "intro" ? "intro" : item.photo.publicId;
+          const el = elMap.get(key);
+          if (el && el.isConnected) updateItem(el, i);
+        }
       }
       rafId = requestAnimationFrame(tick);
     };
@@ -169,7 +201,7 @@ export function useGallery(photos: PhotoProps[]) {
     return () => {
       cancelAnimationFrame(rafId);
     };
-  }, [items, photos, filteredPhotos, lenisRef, pathname, setSelectedYear, setSelectedMonth]);
+  }, [items, photos, pathname]);
 
   useEffect(() => {
     const sync = () => {
@@ -183,30 +215,21 @@ export function useGallery(photos: PhotoProps[]) {
   }, []);
 
   useEffect(() => {
-    const unsub = onScroll((currentP) => {
-      if (blockScrollRef.current) return;
-      pRef.current = currentP;
-      onScrollUpdate(currentP);
-      const now = performance.now();
-      if (now - lastRenderRef.current > 16) {
-        lastRenderRef.current = now;
-        setP(currentP);
-      }
-    });
-    return unsub;
-  }, [onScroll, onScrollUpdate]);
-
-  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement;
       if (
-        document.activeElement?.tagName === "INPUT" ||
-        document.activeElement?.tagName === "TEXTAREA"
+        activeEl?.tagName === "INPUT" ||
+        activeEl?.tagName === "TEXTAREA" ||
+        activeEl?.tagName === "BUTTON" ||
+        activeEl?.tagName === "SELECT" ||
+        activeEl?.hasAttribute("contenteditable") ||
+        activeEl?.getAttribute("role") === "button"
       ) {
         return;
       }
 
       let nextIndex = -1;
-      const currentIndex = targetIndexRef.current;
+      const currentIndex = Math.round(pRef.current); // Use live position rather than trusting targetIndexRef alone
 
       if (e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === " ") {
         e.preventDefault();
@@ -232,10 +255,12 @@ export function useGallery(photos: PhotoProps[]) {
       setSelectedMonth(month);
       pRef.current = 0;
       targetIndexRef.current = 0;
-      lenisRef.current?.scrollTo(0, { immediate: true });
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
       setP(0);
     });
-  }, [lenisRef]);
+  }, []);
 
   const handleCardClick = useCallback(
     (e: React.MouseEvent, index: number) => {
@@ -254,14 +279,16 @@ export function useGallery(photos: PhotoProps[]) {
   );
 
   const handlePrev = useCallback(() => {
-    targetIndexRef.current = Math.max(0, targetIndexRef.current - 1);
-    snapToPrev();
-  }, [snapToPrev]);
+    const nextIndex = Math.max(0, targetIndexRef.current - 1);
+    targetIndexRef.current = nextIndex;
+    scrollTo(nextIndex);
+  }, [scrollTo]);
 
   const handleNext = useCallback(() => {
-    targetIndexRef.current = Math.min(items.length - 1, targetIndexRef.current + 1);
-    snapToNext();
-  }, [items.length, snapToNext]);
+    const nextIndex = Math.min(items.length - 1, targetIndexRef.current + 1);
+    targetIndexRef.current = nextIndex;
+    scrollTo(nextIndex);
+  }, [items.length, scrollTo]);
 
   return {
     selectedYear,
@@ -274,6 +301,8 @@ export function useGallery(photos: PhotoProps[]) {
     p,
     vh,
     elMapRef,
+    scrollContainerRef,
+    handleScroll,
     handleFilterChange,
     handleCardClick,
     handlePrev,
