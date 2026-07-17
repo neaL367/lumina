@@ -24,6 +24,7 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
     handleCardClick,
     handlePrev,
     handleNext,
+    isReady,
   } = useGallery(photos);
 
   return (
@@ -31,6 +32,7 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
       ref={scrollContainerRef}
       onScroll={handleScroll}
       className="relative w-full h-dvh overflow-y-auto snap-y snap-mandatory no-scrollbar"
+      style={{ visibility: isReady ? "visible" : "hidden" }}
     >
       {/* Invisible Snap Points */}
       <div
@@ -77,6 +79,7 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
             <div
               key={key}
               data-key={key}
+              data-gallery-card="true"
               ref={(el) => {
                 if (el) elMapRef.current.set(key, el);
                 else elMapRef.current.delete(key);

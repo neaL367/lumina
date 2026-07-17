@@ -1,94 +1,120 @@
-import { useRef, useState, useCallback, useEffect, useLayoutEffect, useMemo, startTransition } from "react";
+"use client";
+
+import { useRef, useState, useCallback, useEffect, useLayoutEffect, startTransition } from "react";
 import { usePathname } from "next/navigation";
 import { usePhotoNavigation } from "@/hooks/use-photo-navigation";
+import { useGalleryFilter, filterPhotosByDate } from "@/hooks/use-gallery-filter";
+import { useViewportHeight } from "@/hooks/use-viewport-height";
 import { getInterpolatedStyle } from "@/components/gallery/interpolation";
 import type { PhotoProps } from "@/utils/types";
 
 export const CARD_SPACING_PX = 800;
 
-export function useGallery(photos: PhotoProps[]) {
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
-  const [filterExpanded, setFilterExpanded] = useState(false);
+// Get the key identifier for gallery items
+function getItemKey(item: { type: "intro" } | { type: "photo"; photo: PhotoProps }): string {
+  return item.type === "intro" ? "intro" : item.photo.publicId;
+}
 
+export function useGallery(photos: PhotoProps[]) {
+  // --- Gallery Filter Hooks ---
+  const {
+    selectedYear,
+    setSelectedYear,
+    selectedMonth,
+    setSelectedMonth,
+    filterExpanded,
+    setFilterExpanded,
+    years,
+    months,
+    filteredPhotos,
+    items,
+  } = useGalleryFilter(photos);
+
+  // --- Viewport Height & Mobile Detection Hook ---
+  const { vh, isMobileRef } = useViewportHeight();
+
+  // --- React State Hooks ---
+  const [p, setP] = useState(0);
+
+  // --- Refs (Logical State & DOM Targets) ---
+  const blockScrollRef = useRef(false);
+  const targetIndexRef = useRef(0);
+  const pRef = useRef(0);
+  const lastRenderRef = useRef(0);
+  const elMapRef = useRef(new Map<string, HTMLDivElement>());
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // --- Navigation & Routing Hooks ---
   const pathname = usePathname();
   const restoreDoneRef = useRef(false);
   const lastPathnameRef = useRef(pathname);
 
-  const years = useMemo(() => {
-    const uniqueYears = new Set<string>();
-    photos.forEach((photo) => {
-      if (photo.createdAt) {
-        const year = new Date(photo.createdAt).getFullYear().toString();
-        uniqueYears.add(year);
-      }
-    });
-    return Array.from(uniqueYears).sort((a, b) => b.localeCompare(a));
-  }, [photos]);
+  // Track if scroll position restoration has completed to prevent initial mount layout flashes
+  const [isReady, setIsReady] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    if (pathname !== "/") return true;
+    // If there is no stored index, we are ready immediately
+    return sessionStorage.getItem("galleryScrollIndex") === null;
+  });
 
-  const months = useMemo(() => {
-    if (!selectedYear) return [];
-    const uniqueMonths = new Set<number>();
-    photos.forEach((photo) => {
-      if (photo.createdAt) {
-        const date = new Date(photo.createdAt);
-        if (date.getFullYear().toString() === selectedYear) {
-          uniqueMonths.add(date.getMonth());
-        }
-      }
-    });
-    return Array.from(uniqueMonths).sort((a, b) => a - b);
-  }, [photos, selectedYear]);
-
-  const filteredPhotos = useMemo(() => {
-    return photos.filter((photo) => {
-      if (!photo.createdAt) return !selectedYear;
-      const date = new Date(photo.createdAt);
-      if (selectedYear && date.getFullYear().toString() !== selectedYear) {
-        return false;
-      }
-      if (selectedMonth !== null && date.getMonth() !== selectedMonth) {
-        return false;
-      }
-      return true;
-    });
-  }, [photos, selectedYear, selectedMonth]);
-
-  const items = useMemo(() => [
-    { type: "intro" as const },
-    ...filteredPhotos.map((photo) => ({ type: "photo" as const, photo })),
-  ], [filteredPhotos]);
-
-  const blockScrollRef = useRef(false);
-  const targetIndexRef = useRef(0);
-  const pRef = useRef(0);
-
-  const [p, setP] = useState(0);
-  const [vh, setVh] = useState(0);
-  const lastRenderRef = useRef(0);
-  const elMapRef = useRef(new Map<string, HTMLDivElement>());
-  const isMobileRef = useRef(false);
-
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const { navigateToPhoto, onScrollUpdate } = usePhotoNavigation(filteredPhotos);
 
+  // --- Programmatic Jump Counter ---
+  // Tracks active programmatic scrolls to prevent browser resets from triggering safety nets
+  const programmaticJumpCountRef = useRef(0);
+
+  // --- Core Scroll/Programmatic Navigation Utilities ---
   const scrollTo = useCallback((index: number, immediate = false) => {
     const el = scrollContainerRef.current;
     if (!el) return;
+
+    // Safety-net: if the actual scroll container is not at the expected position (e.g. due to browser scroll reset),
+    // instantly force it back to the current position before starting the smooth/instant scroll.
+    const expectedScrollTop = Math.round(pRef.current) * CARD_SPACING_PX;
+    if (Math.abs(el.scrollTop - expectedScrollTop) > 10) {
+      el.scrollTo({ top: expectedScrollTop, behavior: "instant" });
+    }
+
     const clampedIndex = Math.max(0, Math.min(items.length - 1, index));
+    programmaticJumpCountRef.current++;
     el.scrollTo({
       top: clampedIndex * CARD_SPACING_PX,
       behavior: immediate ? "instant" : "smooth" as ScrollBehavior
     });
+
+    // Reset the programmatic jump flag after smooth scroll completes
+    setTimeout(() => {
+      programmaticJumpCountRef.current = Math.max(0, programmaticJumpCountRef.current - 1);
+    }, 800);
   }, [items.length]);
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    if (blockScrollRef.current) return;
-    const scrollTop = e.currentTarget.scrollTop;
+    const container = e.currentTarget;
+    if (blockScrollRef.current) {
+      const expectedScrollTop = targetIndexRef.current * CARD_SPACING_PX;
+      const maxScrollable = container.scrollHeight - container.clientHeight;
+      // Only re-assert if the container is actually tall enough to be scrolled to the expected position
+      if (maxScrollable >= expectedScrollTop && Math.abs(container.scrollTop - expectedScrollTop) > 1) {
+        container.scrollTop = expectedScrollTop;
+      }
+      return;
+    }
+
+    const scrollTop = container.scrollTop;
+    const expectedScrollTop = pRef.current * CARD_SPACING_PX;
+    const diff = Math.abs(scrollTop - expectedScrollTop);
+
+    // Protect against browser-initiated scroll resets during/after route transitions
+    if (programmaticJumpCountRef.current === 0 && diff > CARD_SPACING_PX * 1.5) {
+      container.scrollTop = expectedScrollTop;
+      return;
+    }
+
     const currentP = scrollTop / CARD_SPACING_PX;
     pRef.current = currentP;
     targetIndexRef.current = Math.round(currentP); // keep target in sync with real scroll position
     onScrollUpdate(currentP);
+
     const now = performance.now();
     if (now - lastRenderRef.current > 16) {
       lastRenderRef.current = now;
@@ -96,9 +122,11 @@ export function useGallery(photos: PhotoProps[]) {
     }
   }, [onScrollUpdate]);
 
-  // Animation loop — writes transforms/opacity directly to DOM at native refresh rate
+  // --- DOM Sync Layout Effect ---
+  // Coordinates transforms/opacity writes directly to DOM at native refresh rate
   useLayoutEffect(() => {
     const elMap = elMapRef.current;
+    const container = scrollContainerRef.current;
 
     // Reset restore state on navigation back to homepage
     if (pathname !== lastPathnameRef.current) {
@@ -108,14 +136,43 @@ export function useGallery(photos: PhotoProps[]) {
       }
     }
 
+    let restoreAttempts = 0;
+    const MAX_RESTORE_ATTEMPTS = 40; // ~0.6s at 60fps
+
+    // Focus the target card to align accessibility and scroll-snap states
+    const focusCard = (index: number) => {
+      setTimeout(() => {
+        const item = items[index];
+        if (item) {
+          const key = getItemKey(item);
+          const cardEl = elMap.get(key);
+          if (cardEl) {
+            cardEl.focus({ preventScroll: true });
+          }
+        }
+      }, 50);
+    };
+
     const tryRestore = () => {
       if (restoreDoneRef.current) return;
-      const stored = sessionStorage.getItem("galleryScrollIndex");
       if (pathname !== "/") return;
+
+      const storedIndex = sessionStorage.getItem("galleryScrollIndex");
       try {
-        if (stored === null) return;
-        const parsed = parseInt(stored, 10);
-        if (isNaN(parsed) || parsed <= 0) return;
+        if (storedIndex === null) {
+          restoreDoneRef.current = true;
+          setIsReady(true);
+          focusCard(0);
+          return;
+        }
+
+        const parsedIndex = parseInt(storedIndex, 10);
+        if (isNaN(parsedIndex) || parsedIndex <= 0) {
+          restoreDoneRef.current = true;
+          setIsReady(true);
+          focusCard(0);
+          return;
+        }
 
         const el = scrollContainerRef.current;
         if (!el) return;
@@ -128,30 +185,51 @@ export function useGallery(photos: PhotoProps[]) {
         setSelectedYear(yearVal);
         setSelectedMonth(monthVal);
 
-        const tempFilteredPhotos = photos.filter((photo) => {
-          if (!photo.createdAt) return !yearVal;
-          const date = new Date(photo.createdAt);
-          if (yearVal && date.getFullYear().toString() !== yearVal) return false;
-          if (monthVal !== null && date.getMonth() !== monthVal) return false;
-          return true;
-        });
+        const tempFilteredPhotos = filterPhotosByDate(photos, yearVal, monthVal);
         const tempItemsCount = tempFilteredPhotos.length + 1;
 
-        const clamped = Math.max(0, Math.min(tempItemsCount - 1, parsed));
+        const clamped = Math.max(0, Math.min(tempItemsCount - 1, parsedIndex));
+        const expectedScrollTop = clamped * CARD_SPACING_PX;
+        const maxScrollable = el.scrollHeight - el.clientHeight;
+
+        // If the container is not yet tall enough to hold the scroll position, wait for the next frame
+        if (maxScrollable < expectedScrollTop) {
+          restoreAttempts++;
+          if (restoreAttempts > MAX_RESTORE_ATTEMPTS) {
+            restoreDoneRef.current = true;
+            setIsReady(true);
+            focusCard(0);
+          }
+          return;
+        }
+
         pRef.current = clamped;
         targetIndexRef.current = clamped;
         blockScrollRef.current = true;
         restoreDoneRef.current = true;
+        programmaticJumpCountRef.current++;
+        
         sessionStorage.removeItem("galleryScrollIndex");
         sessionStorage.removeItem("galleryScrollYear");
         sessionStorage.removeItem("galleryScrollMonth");
-        
-        el.scrollTop = clamped * CARD_SPACING_PX;
+
+        el.scrollTop = expectedScrollTop;
         setP(clamped);
-        setTimeout(() => {
+        setIsReady(true);
+        focusCard(clamped);
+
+        let unblocked = false;
+        const unblock = () => {
+          if (unblocked) return;
+          unblocked = true;
           blockScrollRef.current = false;
-        }, 100);
-      } catch (e) { console.error("[tryRestore] error", e); }
+          programmaticJumpCountRef.current = Math.max(0, programmaticJumpCountRef.current - 1);
+        };
+        setTimeout(unblock, 500); // 500ms covers standard view transition and routing lifecycle
+      } catch (e) {
+        console.error("[tryRestore] error", e);
+        setIsReady(true);
+      }
     };
 
     const updateItem = (el: HTMLDivElement, index: number) => {
@@ -174,56 +252,76 @@ export function useGallery(photos: PhotoProps[]) {
     // Synchronous initial sync before first paint
     tryRestore();
     for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      const key = item.type === "intro" ? "intro" : item.photo.publicId;
-      const el = elMap.get(key);
+      const el = elMap.get(getItemKey(items[i]));
       if (el) updateItem(el, i);
     }
 
     let lastP = -999;
     let rafId: number;
+    let idleFrames = 0;
+    let isRunning = false;
+
     const tick = () => {
       tryRestore();
       const currentP = pRef.current;
       if (currentP !== lastP) {
         lastP = currentP;
+        idleFrames = 0;
         for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          const key = item.type === "intro" ? "intro" : item.photo.publicId;
-          const el = elMap.get(key);
+          const el = elMap.get(getItemKey(items[i]));
           if (el && el.isConnected) updateItem(el, i);
         }
+      } else {
+        idleFrames++;
       }
+
+      if (idleFrames < 10) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        isRunning = false;
+      }
+    };
+
+    const startLoop = () => {
+      if (isRunning) return;
+      isRunning = true;
+      idleFrames = 0;
       rafId = requestAnimationFrame(tick);
     };
-    rafId = requestAnimationFrame(tick);
+
+    // Start initial loop
+    startLoop();
+
+    const handleContainerScroll = () => {
+      startLoop();
+    };
+
+    if (container) {
+      container.addEventListener("scroll", handleContainerScroll, { passive: true });
+    }
 
     return () => {
       cancelAnimationFrame(rafId);
+      if (container) {
+        container.removeEventListener("scroll", handleContainerScroll);
+      }
     };
   }, [items, photos, pathname]);
 
-  useEffect(() => {
-    const sync = () => {
-      const mobile = window.innerWidth < 768;
-      setVh(window.innerHeight);
-      isMobileRef.current = mobile;
-    };
-    sync();
-    window.addEventListener("resize", sync, { passive: true });
-    return () => window.removeEventListener("resize", sync);
-  }, []);
-
+  // --- Keyboard Listeners Effect ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeEl = document.activeElement;
+      const isGalleryCard = activeEl?.hasAttribute("data-gallery-card");
       if (
-        activeEl?.tagName === "INPUT" ||
-        activeEl?.tagName === "TEXTAREA" ||
-        activeEl?.tagName === "BUTTON" ||
-        activeEl?.tagName === "SELECT" ||
-        activeEl?.hasAttribute("contenteditable") ||
-        activeEl?.getAttribute("role") === "button"
+        !isGalleryCard && (
+          activeEl?.tagName === "INPUT" ||
+          activeEl?.tagName === "TEXTAREA" ||
+          activeEl?.tagName === "BUTTON" ||
+          activeEl?.tagName === "SELECT" ||
+          activeEl?.hasAttribute("contenteditable") ||
+          activeEl?.getAttribute("role") === "button"
+        )
       ) {
         return;
       }
@@ -249,18 +347,23 @@ export function useGallery(photos: PhotoProps[]) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [items.length, scrollTo]);
 
+  // --- Public Event Handlers ---
   const handleFilterChange = useCallback((year: string | null, month: number | null) => {
     startTransition(() => {
       setSelectedYear(year);
       setSelectedMonth(month);
       pRef.current = 0;
       targetIndexRef.current = 0;
+      programmaticJumpCountRef.current++;
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop = 0;
       }
       setP(0);
+      setTimeout(() => {
+        programmaticJumpCountRef.current = Math.max(0, programmaticJumpCountRef.current - 1);
+      }, 150);
     });
-  }, []);
+  }, [setSelectedYear, setSelectedMonth]);
 
   const handleCardClick = useCallback(
     (e: React.MouseEvent, index: number) => {
@@ -307,5 +410,6 @@ export function useGallery(photos: PhotoProps[]) {
     handleCardClick,
     handlePrev,
     handleNext,
+    isReady,
   };
 }
