@@ -1,6 +1,3 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import { ViewTransition } from "react";
 
 function CardSkeleton({ className = "" }: { className?: string }) {
@@ -32,10 +29,15 @@ export function GallerySkeleton() {
 }
 
 export function PhotoSkeleton() {
-  const params = useParams();
-  const idArray = params?.id;
-  const idStr = Array.isArray(idArray) ? idArray.join("_") : (idArray || "");
-  const sanitizedId = idStr.replace(/[^a-zA-Z0-9-_]/g, "_");
+  let sanitizedId = "";
+  if (typeof window !== "undefined") {
+    const pathSegments = window.location.pathname.split("/").filter(Boolean);
+    const pIndex = pathSegments.indexOf("p");
+    if (pIndex !== -1) {
+      const idStr = pathSegments.slice(pIndex + 1).join("_");
+      sanitizedId = idStr.replace(/[^a-zA-Z0-9-_]/g, "_");
+    }
+  }
 
   return (
     <div className="w-full min-h-dvh bg-[#f3f3f3] dark:bg-zinc-950 flex items-center justify-center sm:p-6">
