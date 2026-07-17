@@ -24,8 +24,6 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
     handleScroll,
     handleFilterChange,
     handleCardClick,
-    handlePrev,
-    handleNext,
     isReady,
   } = useGallery(photos);
 
@@ -134,13 +132,13 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
                     : "w-[70vw] max-w-[260px] sm:max-w-[320px] md:max-w-[380px] lg:max-w-[420px] aspect-[3/4]"
                 }`}
               >
-                <PhotoCard photo={item.photo} eager={index < 4} isFocused={isFocused} />
+                <PhotoCard photo={item.photo} eager={isFocused || index < 4} isFocused={isFocused} />
               </div>
             </ViewTransition>
           );
         })}
 
-        <div className="fixed bottom-8 left-8 right-8 z-40 flex items-center justify-between text-zinc-500 dark:text-zinc-400 font-mono text-xs select-none pointer-events-none">
+        <div className="fixed bottom-8 left-8 right-8 z-40 flex items-center justify-center text-zinc-500 dark:text-zinc-400 font-mono text-xs select-none pointer-events-none">
           <div className="flex items-center gap-4 pointer-events-auto">
             <div className="text-zinc-700 dark:text-zinc-300">
               <span className="text-zinc-950 dark:text-white font-medium">
@@ -157,31 +155,7 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 pointer-events-auto">
-            <span className="hidden md:inline text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-medium">
-              {Math.abs(p - Math.round(p)) < 0.05
-                ? Math.round(p) === 0
-                  ? "Scroll down to explore"
-                  : "Click photo to open"
-                : "Scroll to next image"}
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={handlePrev}
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 dark:bg-black/25 backdrop-blur-md border border-zinc-200/30 dark:border-zinc-800/40 text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 hover:dark:text-white hover:bg-white/20 dark:hover:bg-black/35 hover:scale-105 transition-all duration-300 cursor-pointer shadow-sm"
-                aria-label="Previous image"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
-              </button>
-              <button
-                onClick={handleNext}
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 dark:bg-black/25 backdrop-blur-md border border-zinc-200/30 dark:border-zinc-800/40 text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 hover:dark:text-white hover:bg-white/20 dark:hover:bg-black/35 hover:scale-105 transition-all duration-300 cursor-pointer shadow-sm"
-                aria-label="Next image"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </button>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

@@ -3,13 +3,15 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { cacheLife } from "next/cache";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { getCloudinaryAssetPath, getCloudinaryImageUrl } from "@/lib/cloudinary-images";
+import {
+  getCloudinaryAssetPath,
+  getCloudinaryImageUrl,
+} from "@/lib/cloudinary-images";
 import { getPhotoByRouteParam } from "@/lib/photos";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { PhotoSkeleton } from "@/components/gallery-skeleton";
 import { getPhotoRoutePath } from "@/utils/photo-paths";
 import type { PhotoProps } from "@/utils/types";
-
 
 async function PhotoContent({ params }: { params: Promise<{ id: string[] }> }) {
   const { id } = await params;
@@ -37,7 +39,10 @@ async function PhotoContentInner({ id }: { id: string }) {
 function PhotoDisplay({ photo }: { photo: PhotoProps }) {
   const isLandscape = photo.width > photo.height;
   const assetPath = getCloudinaryAssetPath(photo.publicId, photo.format);
-  const fullImageUrl = getCloudinaryImageUrl(assetPath, { quality: 100, fit: "scale" });
+  const fullImageUrl = getCloudinaryImageUrl(assetPath, {
+    quality: 100,
+    fit: "scale",
+  });
 
   return (
     <div className="w-full min-h-dvh bg-[#f3f3f3] dark:bg-zinc-950 flex items-center justify-center sm:p-6 relative">
@@ -60,7 +65,10 @@ function PhotoDisplay({ photo }: { photo: PhotoProps }) {
         <ExternalLink size={18} />
       </a>
       <div className="relative w-full max-w-5xl mx-auto">
-        <ViewTransition name={`photo-${getPhotoRoutePath(photo.publicId)}`} share="photo-morph">
+        <ViewTransition
+          name={`photo-${getPhotoRoutePath(photo.publicId)}`}
+          share="photo-morph"
+        >
           <div
             className={`relative overflow-hidden w-full sm:rounded-3xl rounded-none border-y sm:border border-zinc-200/20 dark:border-zinc-800/35 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.22)] dark:shadow-[0_35px_80px_-15px_rgba(0,0,0,0.65)] ${
               isLandscape ? "aspect-[3/2]" : "aspect-[3/4] max-w-lg mx-auto"
@@ -80,8 +88,14 @@ export default function PhotoPage({
   params: Promise<{ id: string[] }>;
 }) {
   return (
-    <Suspense fallback={<PhotoSkeleton />}>
-      <ViewTransition enter="page-enter" exit="page-exit duration-100">
+    <Suspense
+      fallback={
+        <ViewTransition enter="page-enter" exit="page-exit duration-100">
+          <PhotoSkeleton />{" "}
+        </ViewTransition>
+      }
+    >
+      <ViewTransition enter="page-enter" exit="page-exit duration-100" default="none">
         <PhotoContent params={params} />
       </ViewTransition>
     </Suspense>

@@ -164,7 +164,6 @@ export function useGallery(photos: PhotoProps[]) {
         if (storedIndex === null) {
           restoreDoneRef.current = true;
           setIsReady(true);
-          focusCard(0);
           return;
         }
 
@@ -172,7 +171,6 @@ export function useGallery(photos: PhotoProps[]) {
         if (isNaN(parsedIndex) || parsedIndex <= 0) {
           restoreDoneRef.current = true;
           setIsReady(true);
-          focusCard(0);
           return;
         }
 
@@ -200,7 +198,6 @@ export function useGallery(photos: PhotoProps[]) {
           if (restoreAttempts > MAX_RESTORE_ATTEMPTS) {
             restoreDoneRef.current = true;
             setIsReady(true);
-            focusCard(0);
           }
           return;
         }
@@ -340,6 +337,7 @@ export function useGallery(photos: PhotoProps[]) {
       }
 
       if (nextIndex !== -1) {
+        if (programmaticJumpCountRef.current > 0) return;
         targetIndexRef.current = nextIndex;
         scrollTo(nextIndex);
       }
