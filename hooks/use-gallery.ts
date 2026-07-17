@@ -50,12 +50,7 @@ export function useGallery(photos: PhotoProps[]) {
   const lastPathnameRef = useRef(pathname);
 
   // Track if scroll position restoration has completed to prevent initial mount layout flashes
-  const [isReady, setIsReady] = useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    if (pathname !== "/") return true;
-    // If there is no stored index, we are ready immediately
-    return sessionStorage.getItem("galleryScrollIndex") === null;
-  });
+  const [isReady, setIsReady] = useState(false);
 
   const { navigateToPhoto, onScrollUpdate } = usePhotoNavigation(filteredPhotos);
 

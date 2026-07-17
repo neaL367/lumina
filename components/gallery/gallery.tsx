@@ -129,10 +129,10 @@ function GalleryInner({ photos }: { photos: PhotoProps[] }): React.JSX.Element {
                 className={`absolute left-1/2 top-1/2 cursor-pointer will-change-transform select-none ${
                   isLandscape
                     ? "w-[90vw] max-w-[340px] sm:max-w-[440px] md:max-w-[540px] lg:max-w-[620px] aspect-[3/2]"
-                    : "w-[70vw] max-w-[260px] sm:max-w-[320px] md:max-w-[380px] lg:max-w-[420px] aspect-[3/4]"
+                    : "w-[60vw] max-w-[220px] sm:max-w-[270px] md:max-w-[320px] lg:max-w-[360px] aspect-[3/4]"
                 }`}
               >
-                <PhotoCard photo={item.photo} eager={isFocused || index < 4} isFocused={isFocused} />
+                <PhotoCard photo={item.photo} eager={isFocused || index < 4} isFocused={isFocused} sizes={isLandscape ? `(max-width: 640px) 90vw, (max-width: 1024px) 50vw, (max-width: 1920px) 35vw, 620px` : `(max-width: 640px) 60vw, (max-width: 1024px) 30vw, (max-width: 1920px) 20vw, 360px`} />
               </div>
             </ViewTransition>
           );
