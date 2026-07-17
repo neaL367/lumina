@@ -4,11 +4,10 @@ import Link from "next/link";
 import { cacheLife } from "next/cache";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { getCloudinaryAssetPath, getCloudinaryImageUrl } from "@/lib/cloudinary-images";
-import { getPhotoByRouteParam, getPhotos } from "@/lib/photos";
+import { getPhotoByRouteParam } from "@/lib/photos";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { PhotoSkeleton } from "@/components/gallery-skeleton";
 import type { PhotoProps } from "@/utils/types";
-import { getPhotoRoutePath } from "@/utils/photo-paths";
 
 async function PhotoContent({ params }: { params: Promise<{ id: string[] }> }) {
   const { id } = await params;
@@ -72,13 +71,6 @@ function PhotoDisplay({ photo }: { photo: PhotoProps }) {
       </div>
     </div>
   );
-}
-
-export async function generateStaticParams() {
-  const photos = await getPhotos();
-  return photos.map((photo) => ({
-    id: [getPhotoRoutePath(photo.publicId)],
-  }));
 }
 
 export default async function PhotoPage({
