@@ -20,7 +20,6 @@ function subscribeStandalone(callback: () => void): () => void {
   return () => media.removeEventListener("change", callback);
 }
 
-// isIOS never changes after mount, so it needs no real subscription.
 function subscribeNever(): () => void {
   return () => {};
 }
@@ -38,8 +37,6 @@ export default function InstallPrompt(): React.JSX.Element | null {
   );
   const [showPrompt, setShowPrompt] = useState(true);
 
-  // This is a genuine side effect (registering a service worker),
-  // not state-syncing, so it belongs in an effect.
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
@@ -54,15 +51,15 @@ export default function InstallPrompt(): React.JSX.Element | null {
   }, []);
 
   if (isStandalone || !showPrompt) {
-    return null; // Don't show if already installed or dismissed
+    return null;
   }
 
   if (!isIOS) {
-    return null; // Browsers handle native PWA install prompts automatically on Android/Desktop
+    return null;
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-9999 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-4 flex items-start justify-between text-white/90 shadow-2xl">
+    <div className="fixed bottom-4 left-4 right-4 z-9999 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-4 flex items-start justify-between text-white/90 shadow-2xl" style={{ viewTransitionName: "install-prompt" }}>
       <div>
         <h3 className="font-semibold text-white mb-1">Install Lumina</h3>
         <p className="text-sm text-white/70">
