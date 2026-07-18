@@ -12,9 +12,8 @@ export function usePhotoNavigation(photos: PhotoProps[]) {
 
   const getPhotoHrefForIndex = useCallback(
     (index: number): string | null => {
-      const photoIndex = index - 1;
-      if (photoIndex < 0 || photoIndex >= photos.length) return null;
-      return getPhotoHref(photos[photoIndex].publicId);
+      if (index < 0 || index >= photos.length) return null;
+      return getPhotoHref(photos[index].publicId);
     },
     [photos]
   );
