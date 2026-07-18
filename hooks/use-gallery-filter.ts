@@ -48,10 +48,9 @@ export function useGalleryFilter(photos: PhotoProps[]) {
     return filterPhotosByDate(photos, selectedYear, selectedMonth);
   }, [photos, selectedYear, selectedMonth]);
 
-  const items = useMemo(() => [
-    { type: "intro" as const },
-    ...filteredPhotos.map((photo) => ({ type: "photo" as const, photo })),
-  ], [filteredPhotos]);
+  const items = useMemo(() =>
+    filteredPhotos.map((photo) => ({ type: "photo" as const, photo })),
+  [filteredPhotos]);
 
   return {
     selectedYear,
