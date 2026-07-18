@@ -1,26 +1,15 @@
+"use client";
+
 import { useMemo } from "react";
+import { useGalleryContext } from "@/components/gallery/gallery-provider";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-interface GalleryFilterProps {
-  selectedYear: string | null;
-  selectedMonth: number | null;
-  filterExpanded: boolean;
-  setFilterExpanded: (expanded: boolean) => void;
-  years: string[];
-  months: number[];
-  handleFilterChange: (year: string | null, month: number | null) => void;
-}
+export function GalleryFilter() {
+  const { state, actions } = useGalleryContext();
+  const { selectedYear, selectedMonth, filterExpanded, years, months } = state;
+  const { handleFilterChange, setFilterExpanded } = actions;
 
-export function GalleryFilter({
-  selectedYear,
-  selectedMonth,
-  filterExpanded,
-  setFilterExpanded,
-  years,
-  months,
-  handleFilterChange,
-}: GalleryFilterProps) {
   const activeFilterLabel = useMemo(() => {
     if (!selectedYear) return "All Memory";
     if (selectedMonth === null) return selectedYear;
@@ -28,11 +17,11 @@ export function GalleryFilter({
   }, [selectedYear, selectedMonth]);
 
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center pointer-events-auto select-none">
+    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center pointer-events-auto select-none" style={{ viewTransitionName: "gallery-filter" }}>
       {/* Toggle Pill */}
       <button
         onClick={() => setFilterExpanded(!filterExpanded)}
-        className={`flex items-center gap-2.5 px-5 py-3 rounded-full bg-white/70 dark:bg-zinc-950/65 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/40 text-[10px] text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 hover:dark:text-white hover:bg-white/90 dark:hover:bg-zinc-900/80 transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] font-sans tracking-widest uppercase font-semibold ${
+        className={`flex items-center gap-2.5 px-5 py-3 rounded-full bg-white/70 dark:bg-zinc-950/65 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/40 text-[10px] text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 hover:dark:text-white hover:bg-white/90 dark:hover:bg-zinc-900/80 transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] font-sans tracking-widest uppercase font-semibold focus:outline-none ${
           filterExpanded ? "scale-[1.02] border-zinc-300 dark:border-zinc-700" : ""
         }`}
       >
