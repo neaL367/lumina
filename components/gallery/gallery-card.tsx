@@ -44,6 +44,7 @@ export function GalleryCard(
   const portraitSizes = `(max-width: 640px) 60vw, (max-width: 1024px) 30vw, (max-width: 1920px) 20vw, 360px`;
 
   const scaleClass = isFocused ? "scale-[1.03] opacity-100" : "scale-[0.96] opacity-60";
+  const neighborLabel = diff > 0.15 ? "← PREVIOUS" : diff < -0.15 ? "NEXT →" : null;
 
   /**
    * Enter/Space on a card. Unfocused cards align into place instead of
@@ -90,17 +91,23 @@ export function GalleryCard(
           href={getPhotoHref(item.photo.publicId)}
           prefetch={true}
           scroll={false}
+          transitionTypes={["nav-forward"]}
           onClick={(e) => actions.handleCardClick(e, index)}
           onKeyDown={handleCardKeyDown}
-          className="block w-full h-full cursor-pointer focus:outline-none"
+          className="group relative block w-full h-full cursor-pointer focus:outline-none"
         >
-          <div className={`w-full h-full transition-all duration-500 ease-out ${scaleClass}`}>
+          <div className={`w-full h-full transition-all duration-500 ease-out group-hover:brightness-110 ${scaleClass}`}>
             {isFocused ? (
               <FocusedPhotoCard photo={item.photo} sizes={isLandscape ? landscapeSizes : portraitSizes} />
             ) : (
               <BlurredPhotoCard photo={item.photo} eager={index < 4} sizes={isLandscape ? landscapeSizes : portraitSizes} />
             )}
           </div>
+          {neighborLabel && (
+            <span className="pointer-events-none absolute left-1/2 -bottom-7 -translate-x-1/2 whitespace-nowrap text-[9px] font-mono tracking-[0.2em] text-zinc-400 dark:text-zinc-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+              {neighborLabel}
+            </span>
+          )}
         </Link>
       </div>
     </ViewTransition>
