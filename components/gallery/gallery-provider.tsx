@@ -315,6 +315,25 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
         return;
       }
 
+      if (e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        if (document.fullscreenElement) {
+          void document.exitFullscreen();
+        } else {
+          const request = document.documentElement.requestFullscreen?.();
+          void request?.catch(() => {
+            // Fullscreen can be unavailable in embedded or restricted contexts.
+          });
+        }
+        return;
+      }
+
+      if (e.key === "Escape" && document.fullscreenElement) {
+        e.preventDefault();
+        void document.exitFullscreen();
+        return;
+      }
+
       let nextIndex = -1;
       const currentIndex = Math.round(pRef.current);
 
