@@ -7,6 +7,7 @@ import { OverviewGallery } from "@/features/gallery/components/overview-gallery"
 import { GalleryCard } from "./gallery-card";
 import { GalleryFilter } from "./gallery-filter";
 import { GalleryProgress } from "./gallery-progress";
+import { GalleryNavigation } from "./gallery-navigation";
 import { AmbientPhotoBackdrop } from "./ambient-photo-backdrop";
 import { GalleryModeToggle } from "./gallery-mode-toggle";
 
@@ -50,6 +51,7 @@ function GalleryInner(): React.JSX.Element {
 
       <GalleryFilter />
       <GalleryModeToggle />
+      <GalleryNavigation />
 
       {viewMode === "focus" && (
         <div className="sticky top-0 h-dvh w-full overflow-hidden bg-radial from-[#ffffff] to-[#e4e4e7] dark:from-[#1b1b1f] dark:to-[#09090b] flex items-center justify-center">

@@ -3,16 +3,24 @@ import { ArrowLeft } from "lucide-react";
 
 export function PhotoNav() {
   return (
-    <div className="fixed top-6 left-6 right-6 z-50 flex items-center justify-between" style={{ viewTransitionName: "photo-nav" }}>
-      <Link
-        href="/"
-        scroll={false}
-        transitionTypes={["nav-back"]}
-        className="p-3.5 rounded-full bg-white/10 dark:bg-black/25 backdrop-blur-md border border-zinc-200/30 dark:border-zinc-800/40 text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 hover:dark:text-white hover:bg-white/20 dark:hover:bg-black/35 hover:scale-105 transition-all duration-300 cursor-pointer shadow-sm"
-        aria-label="Back to gallery"
-      >
-        <ArrowLeft size={18} />
-      </Link>
+    <div
+      className="fixed top-4 left-4 right-4 z-50 sm:top-5 sm:left-6 sm:right-6"
+      style={{ viewTransitionName: "photo-nav" }}
+    >
+      <div className="mx-auto flex max-w-[1600px] items-center justify-between">
+        <Link
+          href="/"
+          scroll={false}
+          transitionTypes={["nav-back"]}
+          className="gallery-glass-surface gallery-glass-control flex size-11 items-center justify-center rounded-2xl shadow-sm"
+          aria-label="Back to gallery"
+        >
+          <ArrowLeft size={17} />
+        </Link>
+        <span className="gallery-glass-surface hidden rounded-full px-3 py-2 text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-400 sm:block">
+          Photo detail
+        </span>
+      </div>
     </div>
   );
 }

@@ -33,6 +33,48 @@ body {
   margin: 0 auto;
 }
 
+.gallery-glass-surface {
+  background: rgb(255 255 255 / 0.66);
+  border: 1px solid rgb(228 228 231 / 0.55);
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.gallery-glass-control {
+  color: rgb(113 113 122);
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.gallery-glass-control:hover,
+.gallery-glass-control:focus-visible {
+  color: rgb(24 24 27);
+  background: rgb(244 244 245 / 0.72);
+}
+
+.gallery-glass-control:focus-visible {
+  outline: 2px solid rgb(161 161 170 / 0.55);
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gallery-glass-surface {
+    background: rgb(9 9 11 / 0.68);
+    border-color: rgb(39 39 42 / 0.62);
+    box-shadow: 0 16px 44px rgb(0 0 0 / 0.32);
+  }
+
+  .gallery-glass-control {
+    color: rgb(161 161 170);
+  }
+
+  .gallery-glass-control:hover,
+  .gallery-glass-control:focus-visible {
+    color: rgb(255 255 255);
+    background: rgb(39 39 42 / 0.72);
+  }
+}
+
 [data-gallery-card]:focus {
   outline: none;
 }

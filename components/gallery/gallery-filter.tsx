@@ -11,9 +11,12 @@ export function GalleryFilter() {
   const {
     selectedYear,
     selectedMonth,
+    totalCount,
     filterExpanded,
     years,
+    yearCounts,
     months,
+    monthCounts,
     items,
   } = state;
   const { handleFilterChange, setFilterExpanded } = actions;
@@ -52,7 +55,7 @@ export function GalleryFilter() {
         onClick={() => setFilterExpanded(!filterExpanded)}
         aria-expanded={filterExpanded}
         aria-haspopup="dialog"
-        className={`group flex items-center gap-3 rounded-full border px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/60 dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] ${
+        className={`gallery-glass-surface gallery-glass-control group flex items-center gap-3 rounded-full border px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/60 ${
           filterExpanded
             ? "border-zinc-400/60 bg-white/90 text-zinc-950 dark:border-zinc-600/70 dark:bg-zinc-900/90 dark:text-white"
             : "border-zinc-200/50 bg-white/65 text-zinc-700 hover:border-zinc-300/70 hover:bg-white/90 dark:border-zinc-800/50 dark:bg-zinc-950/65 dark:text-zinc-300 dark:hover:border-zinc-700/70 dark:hover:bg-zinc-900/90"
@@ -68,7 +71,7 @@ export function GalleryFilter() {
         <div
           role="dialog"
           aria-label="Filter memories by date"
-          className="absolute top-[calc(100%+0.6rem)] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-zinc-200/60 bg-white/90 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.14)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-2 duration-200 dark:border-zinc-800/60 dark:bg-zinc-950/90 dark:shadow-[0_28px_80px_rgba(0,0,0,0.55)]"
+          className="gallery-glass-surface absolute top-[calc(100%+0.6rem)] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-3xl p-4 animate-in fade-in slide-in-from-top-2 duration-200"
         >
           <div className="flex items-start justify-between border-b border-zinc-200/60 pb-3 dark:border-zinc-800/60">
             <div>
@@ -95,11 +98,11 @@ export function GalleryFilter() {
               Year
             </p>
             <div className="flex flex-wrap gap-1.5">
-              <FilterOption active={selectedYear === null} onClick={() => handleFilterChange(null, null)}>
+              <FilterOption active={selectedYear === null} onClick={() => handleFilterChange(null, null)} count={totalCount}>
                 All
               </FilterOption>
               {years.map((year) => (
-                <FilterOption key={year} active={selectedYear === year} onClick={() => handleFilterChange(year, null)}>
+                <FilterOption key={year} active={selectedYear === year} onClick={() => handleFilterChange(year, null)} count={yearCounts[year]}>
                   {year}
                 </FilterOption>
               ))}
@@ -133,6 +136,7 @@ export function GalleryFilter() {
                         handleFilterChange(selectedYear, index);
                         setFilterExpanded(false);
                       }}
+                      count={monthCounts[index]}
                     >
                       {name}
                     </FilterOption>
@@ -152,12 +156,14 @@ function FilterOption({
   disabled = false,
   className = "",
   onClick,
+  count,
   children,
 }: {
   active: boolean;
   disabled?: boolean;
   className?: string;
   onClick: () => void;
+  count?: number;
   children: React.ReactNode;
 }) {
   return (
@@ -173,7 +179,8 @@ function FilterOption({
             : "bg-zinc-100/70 text-zinc-600 hover:bg-zinc-200/80 hover:text-zinc-950 dark:bg-zinc-900/70 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
       }`}
     >
-      {children}
+      <span>{children}</span>
+      {count !== undefined && <span className="ml-1 text-[8px] opacity-45">{count}</span>}
     </button>
   );
 }

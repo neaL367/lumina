@@ -30,6 +30,16 @@ export function useGalleryFilter(photos: PhotoProps[]) {
     return Array.from(uniqueYears).sort((a, b) => b.localeCompare(a));
   }, [photos]);
 
+  const yearCounts = useMemo(() => {
+    return photos.reduce<Record<string, number>>((counts, photo) => {
+      if (photo.createdAt) {
+        const year = new Date(photo.createdAt).getFullYear().toString();
+        counts[year] = (counts[year] ?? 0) + 1;
+      }
+      return counts;
+    }, {});
+  }, [photos]);
+
   const months = useMemo(() => {
     if (!selectedYear) return [];
     const uniqueMonths = new Set<number>();
@@ -42,6 +52,19 @@ export function useGalleryFilter(photos: PhotoProps[]) {
       }
     });
     return Array.from(uniqueMonths).sort((a, b) => a - b);
+  }, [photos, selectedYear]);
+
+  const monthCounts = useMemo(() => {
+    if (!selectedYear) return {};
+    return photos.reduce<Record<number, number>>((counts, photo) => {
+      if (photo.createdAt) {
+        const date = new Date(photo.createdAt);
+        if (date.getFullYear().toString() === selectedYear) {
+          counts[date.getMonth()] = (counts[date.getMonth()] ?? 0) + 1;
+        }
+      }
+      return counts;
+    }, {});
   }, [photos, selectedYear]);
 
   const filteredPhotos = useMemo(() => {
@@ -60,7 +83,9 @@ export function useGalleryFilter(photos: PhotoProps[]) {
     filterExpanded,
     setFilterExpanded,
     years,
+    yearCounts,
     months,
+    monthCounts,
     filteredPhotos,
     items,
   };

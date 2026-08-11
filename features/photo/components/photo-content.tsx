@@ -44,7 +44,7 @@ function PhotoImage({ photo }: { photo: PhotoProps }): React.JSX.Element {
           href={fullImageUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-3.5 rounded-full bg-white/10 dark:bg-black/25 backdrop-blur-md border border-zinc-200/30 dark:border-zinc-800/40 text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 hover:dark:text-white hover:bg-white/20 dark:hover:bg-black/35 hover:scale-105 transition-all duration-300 cursor-pointer shadow-sm"
+          className="gallery-glass-surface gallery-glass-control flex size-11 items-center justify-center rounded-2xl"
           aria-label="Open full resolution image in new tab"
         >
           <ExternalLink size={18} />

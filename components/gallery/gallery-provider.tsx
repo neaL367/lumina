@@ -19,11 +19,14 @@ interface GalleryState {
   p: number;
   items: { type: "photo"; photo: PhotoProps }[];
   viewMode: GalleryViewMode;
+  totalCount: number;
   selectedYear: string | null;
   selectedMonth: number | null;
   filterExpanded: boolean;
   years: string[];
+  yearCounts: Record<string, number>;
   months: number[];
+  monthCounts: Record<number, number>;
   isReady: boolean;
 }
 
@@ -67,7 +70,9 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
     filterExpanded,
     setFilterExpanded,
     years,
+    yearCounts,
     months,
+    monthCounts,
     items,
   } = useGalleryFilter(photos);
 
@@ -421,11 +426,14 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
     p,
     items,
     viewMode,
+    totalCount: photos.length,
     selectedYear,
     selectedMonth,
     filterExpanded,
     years,
+    yearCounts,
     months,
+    monthCounts,
     isReady,
   };
 

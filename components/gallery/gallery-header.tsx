@@ -9,7 +9,7 @@ export function GalleryHeader() {
     >
       <nav
         aria-label="Primary navigation"
-        className="mx-auto flex max-w-[1600px] items-center justify-between rounded-2xl border border-zinc-200/50 bg-white/65 px-3 py-2.5 shadow-[0_10px_35px_rgba(0,0,0,0.06)] backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/65 dark:shadow-[0_12px_40px_rgba(0,0,0,0.32)]"
+        className="gallery-glass-surface mx-auto flex max-w-[1600px] items-center justify-between rounded-2xl px-3 py-2.5"
       >
         <Link
           href="/"
@@ -37,7 +37,7 @@ export function GalleryHeader() {
             href="https://github.com/neal367"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex size-8 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-white"
+            className="gallery-glass-control flex size-8 items-center justify-center rounded-xl"
             aria-label="GitHub"
           >
             <Github size={14} />
@@ -46,7 +46,7 @@ export function GalleryHeader() {
             href="https://twitter.com/NL367"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex size-8 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-blue-500 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-blue-400"
+            className="gallery-glass-control flex size-8 items-center justify-center rounded-xl hover:text-blue-500 dark:hover:text-blue-400"
             aria-label="Twitter"
           >
             <Twitter size={14} />
