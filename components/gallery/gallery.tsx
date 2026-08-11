@@ -7,6 +7,8 @@ import { OverviewGallery } from "@/features/gallery/components/overview-gallery"
 import { GalleryCard } from "./gallery-card";
 import { GalleryFilter } from "./gallery-filter";
 import { GalleryProgress } from "./gallery-progress";
+import { AmbientPhotoBackdrop } from "./ambient-photo-backdrop";
+import { GalleryModeToggle } from "./gallery-mode-toggle";
 
 function GalleryInner(): React.JSX.Element {
   const { state, meta, actions } = useGalleryContext();
@@ -47,9 +49,11 @@ function GalleryInner(): React.JSX.Element {
       )}
 
       <GalleryFilter />
+      <GalleryModeToggle />
 
       {viewMode === "focus" && (
         <div className="sticky top-0 h-dvh w-full overflow-hidden bg-radial from-[#ffffff] to-[#e4e4e7] dark:from-[#1b1b1f] dark:to-[#09090b] flex items-center justify-center">
+          <AmbientPhotoBackdrop />
           {items.map((item, index) => {
             if (index < windowStart || index > windowStart + 2) {
               return null;
