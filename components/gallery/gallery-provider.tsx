@@ -370,6 +370,17 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
     requestAnimationFrame(() => scrollTo(clampedIndex, true));
   }, [items.length, scrollTo]);
 
+  const changeViewMode = useCallback((mode: GalleryViewMode) => {
+    setViewMode(mode);
+    requestAnimationFrame(() => {
+      if (mode === "focus") {
+        scrollTo(Math.round(pRef.current), true);
+      } else {
+        scrollContainerRef.current?.scrollTo({ top: 0, behavior: "instant" });
+      }
+    });
+  }, [scrollTo]);
+
   const handleFilterChange = useCallback((year: string | null, month: number | null) => {
     startTransition(() => {
       setSelectedYear(year);
@@ -424,7 +435,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
     handleCardClick,
     selectPhoto,
     setFilterExpanded,
-    setViewMode,
+    setViewMode: changeViewMode,
   };
 
   const meta: GalleryMeta = {
