@@ -9,6 +9,7 @@ import { getInterpolatedStyle } from "@/components/gallery/interpolation";
 import type { PhotoProps } from "@/utils/types";
 
 export const CARD_SPACING_PX = 550;
+export type GalleryViewMode = "focus" | "filmstrip";
 
 function getItemKey(item: { type: "photo"; photo: PhotoProps }): string {
   return item.photo.publicId;
@@ -17,6 +18,7 @@ function getItemKey(item: { type: "photo"; photo: PhotoProps }): string {
 interface GalleryState {
   p: number;
   items: { type: "photo"; photo: PhotoProps }[];
+  viewMode: GalleryViewMode;
   selectedYear: string | null;
   selectedMonth: number | null;
   filterExpanded: boolean;
@@ -29,7 +31,9 @@ interface GalleryActions {
   handleScroll: (e: React.UIEvent<HTMLDivElement>) => void;
   handleFilterChange: (year: string | null, month: number | null) => void;
   handleCardClick: (e: React.MouseEvent, index: number) => void;
+  selectPhoto: (index: number) => void;
   setFilterExpanded: (expanded: boolean) => void;
+  setViewMode: (mode: GalleryViewMode) => void;
 }
 
 interface GalleryMeta {
@@ -70,6 +74,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
   const { vh, isMobile, isMobileRef } = useViewportHeight();
 
   const [p, setP] = useState(0);
+  const [viewMode, setViewMode] = useState<GalleryViewMode>("focus");
 
   const blockScrollRef = useRef(false);
   const targetIndexRef = useRef(0);
@@ -296,7 +301,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
         container.removeEventListener("scroll", handleContainerScroll);
       }
     };
-  }, [items, photos, pathname, isMobile, isMobileRef, setSelectedMonth, setSelectedYear]);
+  }, [items, photos, pathname, viewMode, isMobile, isMobileRef, setSelectedMonth, setSelectedYear]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -356,6 +361,15 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [items.length, scrollTo]);
 
+  const selectPhoto = useCallback((index: number) => {
+    const clampedIndex = Math.max(0, Math.min(items.length - 1, index));
+    setViewMode("focus");
+    pRef.current = clampedIndex;
+    targetIndexRef.current = clampedIndex;
+    setP(clampedIndex);
+    requestAnimationFrame(() => scrollTo(clampedIndex, true));
+  }, [items.length, scrollTo]);
+
   const handleFilterChange = useCallback((year: string | null, month: number | null) => {
     startTransition(() => {
       setSelectedYear(year);
@@ -395,6 +409,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
   const state: GalleryState = {
     p,
     items,
+    viewMode,
     selectedYear,
     selectedMonth,
     filterExpanded,
@@ -407,7 +422,9 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
     handleScroll,
     handleFilterChange,
     handleCardClick,
+    selectPhoto,
     setFilterExpanded,
+    setViewMode,
   };
 
   const meta: GalleryMeta = {

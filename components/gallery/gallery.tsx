@@ -6,12 +6,14 @@ import { useGalleryContext } from "@/components/gallery/gallery-provider";
 import { GalleryCard } from "./gallery-card";
 import { GalleryFilter } from "./gallery-filter";
 import { GalleryProgress } from "./gallery-progress";
+import { FilmstripGallery } from "@/features/gallery/components/filmstrip-gallery";
 
 function GalleryInner(): React.JSX.Element {
   const { state, meta, actions } = useGalleryContext();
-  const { p, items, isReady } = state;
+  const { p, items, isReady, viewMode } = state;
   const { scrollContainerRef } = meta;
   const { handleScroll } = actions;
+  const isFilmstrip = viewMode === "filmstrip";
   const focusedIndex = Math.round(p);
   const maxWindowStart = Math.max(items.length - 3, 0);
   const windowStart = Math.min(Math.max(focusedIndex - 1, 0), maxWindowStart);
@@ -20,32 +22,35 @@ function GalleryInner(): React.JSX.Element {
     <div
       ref={scrollContainerRef}
       onScroll={handleScroll}
-      className="gallery-scroll-container relative w-full h-dvh overflow-y-auto snap-y snap-mandatory no-scrollbar focus:outline-none"
+      className={`gallery-scroll-container relative w-full h-dvh no-scrollbar focus:outline-none ${
+        isFilmstrip ? "overflow-hidden" : "overflow-y-auto snap-y snap-mandatory"
+      }`}
       style={{ visibility: isReady ? "visible" : "hidden", touchAction: "manipulation" }}
     >
-      {/* Invisible Snap Points */}
-      <div
-        className="absolute top-0 left-0 w-full pointer-events-none"
-        style={{ height: meta.vh ? `${(items.length - 1) * CARD_SPACING_PX + meta.vh}px` : `${items.length * 100}vh` }}
-      >
-        {items.map((_, index) => (
-          <div
-            key={`snap-${index}`}
-            className="absolute w-full h-[1px]"
-            style={{
-              top: `${index * CARD_SPACING_PX}px`,
-              scrollSnapAlign: "start",
-              scrollSnapStop: "always",
-            }}
-          />
-        ))}
-      </div>
+      {!isFilmstrip && (
+        <div
+          className="absolute top-0 left-0 w-full pointer-events-none"
+          style={{ height: meta.vh ? `${(items.length - 1) * CARD_SPACING_PX + meta.vh}px` : `${items.length * 100}vh` }}
+        >
+          {items.map((_, index) => (
+            <div
+              key={`snap-${index}`}
+              className="absolute w-full h-[1px]"
+              style={{
+                top: `${index * CARD_SPACING_PX}px`,
+                scrollSnapAlign: "start",
+                scrollSnapStop: "always",
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Floating Date Filter Pill */}
       <GalleryFilter />
 
       <div className="sticky top-0 h-dvh w-full overflow-hidden bg-radial from-[#ffffff] to-[#e4e4e7] dark:from-[#1b1b1f] dark:to-[#09090b] flex items-center justify-center">
-        {items.map((item, index) => {
+        {isFilmstrip ? <FilmstripGallery /> : items.map((item, index) => {
           if (index < windowStart || index > windowStart + 2) {
             return null;
           }
