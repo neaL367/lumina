@@ -117,6 +117,8 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
   }, [items.length]);
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    if (viewMode !== "focus") return;
+
     const container = e.currentTarget;
     if (blockScrollRef.current) {
       const expectedScrollTop = targetIndexRef.current * CARD_SPACING_PX;
@@ -146,7 +148,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
       lastRenderRef.current = now;
       setP(currentP);
     }
-  }, [onScrollUpdate]);
+  }, [onScrollUpdate, viewMode]);
 
   useLayoutEffect(() => {
     const elMap = elMapRef.current;
