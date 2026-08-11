@@ -1,5 +1,5 @@
-import { PhotoSkeleton } from "@/components/gallery-skeleton";
+import { PhotoContentSkeleton } from "@/features/photo/components/photo-content";
 
 export default function Loading() {
-  return <PhotoSkeleton />;
+  return <PhotoContentSkeleton />;
 }
