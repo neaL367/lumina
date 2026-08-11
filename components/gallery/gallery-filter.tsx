@@ -47,7 +47,7 @@ export function GalleryFilter() {
 
   return (
     <div
-      className="fixed top-5 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center pointer-events-auto select-none"
+      className="relative flex flex-col items-end pointer-events-auto select-none"
       style={{ viewTransitionName: "gallery-filter" }}
     >
       <button

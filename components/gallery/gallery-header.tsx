@@ -3,12 +3,12 @@ import Link from "next/link";
 export function GalleryHeader() {
   return (
     <header
-      className="fixed top-4 left-4 right-4 z-50 sm:top-5 sm:left-6 sm:right-6"
+      className="gallery-navbar fixed inset-x-0 top-0 z-50 h-16"
       style={{ viewTransitionName: "gallery-header" }}
     >
       <nav
         aria-label="Primary navigation"
-        className="gallery-glass-surface mx-auto flex max-w-[1600px] items-center justify-between rounded-2xl px-3 py-2.5"
+        className="mx-auto flex h-full max-w-[1600px] items-center px-4 sm:px-6 lg:px-8"
       >
         <Link
           href="/"
@@ -27,7 +27,6 @@ export function GalleryHeader() {
             </span>
           </span>
         </Link>
-
       </nav>
     </header>
   );

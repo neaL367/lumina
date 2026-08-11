@@ -5,11 +5,10 @@ import { GalleryProvider, CARD_SPACING_PX } from "@/components/gallery/gallery-p
 import { useGalleryContext } from "@/components/gallery/gallery-provider";
 import { OverviewGallery } from "@/features/gallery/components/overview-gallery";
 import { GalleryCard } from "./gallery-card";
-import { GalleryFilter } from "./gallery-filter";
+import { GalleryHeaderControls } from "./gallery-header-controls";
 import { GalleryProgress } from "./gallery-progress";
 import { GalleryNavigation } from "./gallery-navigation";
 import { AmbientPhotoBackdrop } from "./ambient-photo-backdrop";
-import { GalleryModeToggle } from "./gallery-mode-toggle";
 
 function GalleryInner(): React.JSX.Element {
   const { state, meta, actions } = useGalleryContext();
@@ -49,8 +48,7 @@ function GalleryInner(): React.JSX.Element {
         </div>
       )}
 
-      <GalleryFilter />
-      <GalleryModeToggle />
+      <GalleryHeaderControls />
       <GalleryNavigation />
 
       {viewMode === "focus" && (
