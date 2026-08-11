@@ -29,6 +29,14 @@ export function GalleryProgress() {
           >
             STRIP
           </button>
+          <button
+            type="button"
+            onClick={() => actions.setViewMode("overview")}
+            aria-pressed={viewMode === "overview"}
+            className={`rounded-full px-2 py-1 text-[8px] tracking-[0.15em] transition-colors ${viewMode === "overview" ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950" : "text-zinc-500 hover:text-zinc-950 dark:text-zinc-500 dark:hover:text-white"}`}
+          >
+            ARCHIVE
+          </button>
         </div>
         <div className="text-zinc-700 dark:text-zinc-300">
           <span className="text-zinc-950 dark:text-white font-medium">

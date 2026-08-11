@@ -9,7 +9,7 @@ import { getInterpolatedStyle } from "@/components/gallery/interpolation";
 import type { PhotoProps } from "@/utils/types";
 
 export const CARD_SPACING_PX = 550;
-export type GalleryViewMode = "focus" | "filmstrip";
+export type GalleryViewMode = "focus" | "filmstrip" | "overview";
 
 function getItemKey(item: { type: "photo"; photo: PhotoProps }): string {
   return item.photo.publicId;
