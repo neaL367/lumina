@@ -55,6 +55,8 @@ export function GalleryProgress() {
     }
   };
 
+  if (state.viewMode === "overview") return null;
+
   return (
     <div
       className="fixed bottom-7 left-5 right-5 z-40 flex items-center justify-center text-zinc-500 dark:text-zinc-400 select-none pointer-events-none sm:bottom-8"

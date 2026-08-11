@@ -1,4 +1,3 @@
-import { Github, Twitter } from "lucide-react";
 import Link from "next/link";
 
 export function GalleryHeader() {
@@ -29,29 +28,6 @@ export function GalleryHeader() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <span className="mr-2 hidden text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-400 lg:inline">
-            Visual archive
-          </span>
-          <a
-            href="https://github.com/neal367"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="gallery-glass-control flex size-8 items-center justify-center rounded-xl"
-            aria-label="GitHub"
-          >
-            <Github size={14} />
-          </a>
-          <a
-            href="https://twitter.com/NL367"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="gallery-glass-control flex size-8 items-center justify-center rounded-xl hover:text-blue-500 dark:hover:text-blue-400"
-            aria-label="Twitter"
-          >
-            <Twitter size={14} />
-          </a>
-        </div>
       </nav>
     </header>
   );

@@ -7,7 +7,7 @@ export function GalleryModeToggle(): React.JSX.Element {
   const { state, actions } = useGalleryContext();
 
   return (
-    <div className="gallery-glass-surface fixed top-[4.5rem] left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full p-1 sm:top-5">
+    <div className="gallery-glass-surface fixed top-5 right-4 z-50 flex items-center gap-1 rounded-full p-1 sm:right-6">
       <button
         type="button"
         onClick={() => actions.setViewMode("focus")}
