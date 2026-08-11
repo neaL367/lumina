@@ -1,7 +1,6 @@
 import type { Keyframe } from "@/utils/types";
 
 export const KEYFRAMES_DESKTOP: Keyframe[] = [
-  { diff: -3.0, x: 96, y: 70, scale: 0.50, opacity: 0, rotate: 8 },
   { diff: -2.0, x: 72, y: 50, scale: 0.65, opacity: 0.15, rotate: 5 },
   { diff: -1.0, x: 36, y: 25, scale: 0.82, opacity: 0.30, rotate: 2.5 },
   { diff: -0.3, x: 10, y: 6, scale: 0.95, opacity: 0.70, rotate: 0.8 },
@@ -9,11 +8,9 @@ export const KEYFRAMES_DESKTOP: Keyframe[] = [
   { diff: 0.3, x: -10, y: -6, scale: 0.95, opacity: 0.70, rotate: -0.8 },
   { diff: 1.0, x: -36, y: -25, scale: 0.82, opacity: 0.30, rotate: -2.5 },
   { diff: 2.0, x: -72, y: -50, scale: 0.65, opacity: 0.15, rotate: -5 },
-  { diff: 3.0, x: -96, y: -70, scale: 0.50, opacity: 0, rotate: -8 },
 ];
 
 export const KEYFRAMES_MOBILE: Keyframe[] = [
-  { diff: -3.0, x: 60, y: 80, scale: 0.50, opacity: 0, rotate: 6 },
   { diff: -2.0, x: 44, y: 55, scale: 0.65, opacity: 0.15, rotate: 4 },
   { diff: -1.0, x: 22, y: 28, scale: 0.82, opacity: 0.30, rotate: 2 },
   { diff: -0.3, x: 6, y: 8, scale: 0.95, opacity: 0.70, rotate: 0.6 },
@@ -21,7 +18,6 @@ export const KEYFRAMES_MOBILE: Keyframe[] = [
   { diff: 0.3, x: -6, y: -8, scale: 0.95, opacity: 0.70, rotate: -0.6 },
   { diff: 1.0, x: -22, y: -28, scale: 0.82, opacity: 0.30, rotate: -2 },
   { diff: 2.0, x: -44, y: -55, scale: 0.65, opacity: 0.15, rotate: -4 },
-  { diff: 3.0, x: -60, y: -80, scale: 0.50, opacity: 0, rotate: -6 },
 ];
 
 export function getInterpolatedStyle(diff: number, isMobile = false) {

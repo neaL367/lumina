@@ -12,6 +12,9 @@ function GalleryInner(): React.JSX.Element {
   const { p, items, isReady } = state;
   const { scrollContainerRef } = meta;
   const { handleScroll } = actions;
+  const focusedIndex = Math.round(p);
+  const maxWindowStart = Math.max(items.length - 3, 0);
+  const windowStart = Math.min(Math.max(focusedIndex - 1, 0), maxWindowStart);
 
   return (
     <div
@@ -43,14 +46,17 @@ function GalleryInner(): React.JSX.Element {
 
       <div className="sticky top-0 h-dvh w-full overflow-hidden bg-radial from-[#ffffff] to-[#e4e4e7] dark:from-[#1b1b1f] dark:to-[#09090b] flex items-center justify-center">
         {items.map((item, index) => {
-          const diff = p - index;
-
-          if (Math.abs(diff) >= 3.0) {
+          if (index < windowStart || index > windowStart + 2) {
             return null;
           }
 
           return (
-            <GalleryCard key={item.photo.publicId} item={item} index={index} diff={diff} />
+            <GalleryCard
+              key={item.photo.publicId}
+              item={item}
+              index={index}
+              diff={p - index}
+            />
           );
         })}
 

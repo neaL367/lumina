@@ -233,13 +233,6 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
 
     const updateItem = (el: HTMLElement, index: number) => {
       const diff = pRef.current - index;
-
-      if (Math.abs(diff) >= 3.0) {
-        el.style.display = "none";
-        return;
-      }
-
-      el.style.display = "";
       const style = getInterpolatedStyle(diff, isMobileRef.current);
       el.style.transform = style.transform;
       el.style.opacity = String(style.opacity);

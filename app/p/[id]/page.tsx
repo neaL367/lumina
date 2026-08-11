@@ -82,23 +82,9 @@ export default function PhotoPage({
   return (
     <div className="w-full min-h-dvh bg-[#f3f3f3] dark:bg-zinc-950 flex items-center justify-center sm:p-6 relative">
       <PhotoNav />
-      <ViewTransition
-        enter={{
-          "nav-forward": "nav-forward",
-          "nav-back": "nav-back",
-          default: "none",
-        }}
-        exit={{
-          "nav-forward": "nav-forward",
-          "nav-back": "nav-back",
-          default: "none",
-        }}
-        default="none"
-      >
-        <Suspense fallback={<PhotoSkeleton />}>
-          <PhotoContentWrapper params={params} />
-        </Suspense>
-      </ViewTransition>
+      <Suspense fallback={<PhotoSkeleton />}>
+        <PhotoContentWrapper params={params} />
+      </Suspense>
     </div>
   );
 }

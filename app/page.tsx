@@ -1,4 +1,4 @@
-import { Suspense, ViewTransition } from "react";
+import { Suspense } from "react";
 import { cacheLife } from "next/cache";
 import { Gallery } from "@/components/gallery/gallery";
 import { GalleryHeader } from "@/components/gallery/gallery-header";
@@ -22,23 +22,9 @@ export default async function Home(): Promise<React.JSX.Element> {
   return (
     <main className="w-full min-h-dvh bg-[#f3f3f3] dark:bg-zinc-950 relative overflow-hidden focus:outline-none">
       <GalleryHeader />
-      <ViewTransition
-        enter={{
-          "nav-forward": "nav-forward",
-          "nav-back": "nav-back",
-          default: "none",
-        }}
-        exit={{
-          "nav-forward": "nav-forward",
-          "nav-back": "nav-back",
-          default: "none",
-        }}
-        default="none"
-      >
-        <Suspense fallback={<GallerySkeleton />}>
-          <GalleryContent />
-        </Suspense>
-      </ViewTransition>
+      <Suspense fallback={<GallerySkeleton />}>
+        <GalleryContent />
+      </Suspense>
     </main>
   );
 }

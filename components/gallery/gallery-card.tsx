@@ -85,7 +85,6 @@ export function GalleryCard(
           href={getPhotoHref(item.photo.publicId)}
           prefetch={true}
           scroll={false}
-          transitionTypes={["nav-forward"]}
           data-gallery-card="true"
           onClick={(e) => actions.handleCardClick(e, index)}
           onKeyDown={handleCardKeyDown}
