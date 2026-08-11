@@ -67,7 +67,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
     items,
   } = useGalleryFilter(photos);
 
-  const { vh, isMobileRef } = useViewportHeight();
+  const { vh, isMobile, isMobileRef } = useViewportHeight();
 
   const [p, setP] = useState(0);
 
@@ -303,7 +303,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
         container.removeEventListener("scroll", handleContainerScroll);
       }
     };
-  }, [items, photos, pathname, isMobileRef, setSelectedMonth, setSelectedYear]);
+  }, [items, photos, pathname, isMobile, isMobileRef, setSelectedMonth, setSelectedYear]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
