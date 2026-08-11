@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { ViewTransition } from "react";
 import { useGalleryContext } from "@/components/gallery/gallery-provider";
 import { FocusedPhotoCard } from "./focused-photo-card";
 import { BlurredPhotoCard } from "./blurred-photo-card";
-import { getPhotoRoutePath } from "@/utils/photo-paths";
+import { getPhotoHref, getPhotoRoutePath } from "@/utils/photo-paths";
 import type { PhotoProps } from "@/utils/types";
 
 function getItemKey(item: { type: "photo"; photo: PhotoProps }): string {
@@ -39,29 +40,37 @@ export function GalleryCard(
   const landscapeSizes = `(max-width: 640px) 90vw, (max-width: 1024px) 50vw, (max-width: 1920px) 35vw, 620px`;
   const portraitSizes = `(max-width: 640px) 60vw, (max-width: 1024px) 30vw, (max-width: 1920px) 20vw, 360px`;
 
-  const divProps = {
-    ref: (el: HTMLDivElement | null) => {
-      if (el) meta.elMapRef.current.set(key, el);
-      else meta.elMapRef.current.delete(key);
-    },
-    onClick: (e: React.MouseEvent<HTMLDivElement>) => actions.handleCardClick(e, index),
-    onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        e.stopPropagation();
-        actions.handleCardClick(e as unknown as React.MouseEvent<HTMLDivElement>, index);
-      }
-    },
-    role: "button" as const,
-    tabIndex: 0,
-    className: cardClassName,
-  };
-
   const scaleClass = isFocused ? "scale-[1.03] opacity-100" : "scale-[0.96] opacity-60";
 
   return (
     <ViewTransition key={key} name={`photo-${token}`} share="photo-morph">
-      <div key={key} data-key={key} data-gallery-card="true" {...divProps}>
+      <Link
+        key={key}
+        href={getPhotoHref(item.photo.publicId)}
+        prefetch={true}
+        scroll={false}
+        transitionTypes={["nav-forward"]}
+        data-key={key}
+        data-gallery-card="true"
+        ref={(el) => {
+          if (el) meta.elMapRef.current.set(key, el);
+          else meta.elMapRef.current.delete(key);
+        }}
+        onClick={(e) => actions.handleCardClick(e, index)}
+        onKeyDown={(e) => {
+          // Keep the global Space/arrow handler away from card keystrokes.
+          if (e.key === "Enter" || e.key === " ") {
+            e.stopPropagation();
+            // Unfocused card: align it instead of navigating.
+            if (!isFocused) {
+              e.preventDefault();
+              actions.handleCardClick(e as unknown as React.MouseEvent<HTMLAnchorElement>, index);
+            }
+            // Focused card: let the Link activate (fires onClick → navigate).
+          }
+        }}
+        className={cardClassName}
+      >
         <div className={`w-full h-full transition-all duration-500 ease-out ${scaleClass}`}>
           {isFocused ? (
             <FocusedPhotoCard photo={item.photo} sizes={isLandscape ? landscapeSizes : portraitSizes} />
@@ -69,7 +78,7 @@ export function GalleryCard(
             <BlurredPhotoCard photo={item.photo} eager={index < 4} sizes={isLandscape ? landscapeSizes : portraitSizes} />
           )}
         </div>
-      </div>
+      </Link>
     </ViewTransition>
   );
 }

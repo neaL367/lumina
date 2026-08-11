@@ -30,12 +30,10 @@ interface GalleryActions {
   handleFilterChange: (year: string | null, month: number | null) => void;
   handleCardClick: (e: React.MouseEvent, index: number) => void;
   setFilterExpanded: (expanded: boolean) => void;
-  handlePrev: () => void;
-  handleNext: () => void;
 }
 
 interface GalleryMeta {
-  elMapRef: React.RefObject<Map<string, HTMLDivElement>>;
+  elMapRef: React.RefObject<Map<string, HTMLElement>>;
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   vh: number;
 }
@@ -66,7 +64,6 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
     setFilterExpanded,
     years,
     months,
-    filteredPhotos,
     items,
   } = useGalleryFilter(photos);
 
@@ -78,7 +75,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
   const targetIndexRef = useRef(0);
   const pRef = useRef(0);
   const lastRenderRef = useRef(0);
-  const elMapRef = useRef(new Map<string, HTMLDivElement>());
+  const elMapRef = useRef(new Map<string, HTMLElement>());
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
   const restoreDoneRef = useRef(false);
@@ -86,7 +83,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
   const [isReady, setIsReady] = useState(false);
   const programmaticJumpCountRef = useRef(0);
 
-  const { navigateToPhoto, onScrollUpdate } = usePhotoNavigation(filteredPhotos);
+  const { preparePhotoNavigation, onScrollUpdate } = usePhotoNavigation();
 
   const scrollTo = useCallback((index: number, immediate = false) => {
     const el = scrollContainerRef.current;
@@ -234,7 +231,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
       setTimeout(unblock, 500);
     };
 
-    const updateItem = (el: HTMLDivElement, index: number) => {
+    const updateItem = (el: HTMLElement, index: number) => {
       const diff = pRef.current - index;
 
       if (Math.abs(diff) >= 3.0) {
@@ -306,7 +303,7 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
         container.removeEventListener("scroll", handleContainerScroll);
       }
     };
-  }, [items, photos, pathname]);
+  }, [items, photos, pathname, isMobileRef, setSelectedMonth, setSelectedYear]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -369,28 +366,19 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
       const currentP = pRef.current;
       const diff = currentP - index;
       if (Math.abs(diff) > 0.05) {
+        // Card not yet focused: align it first instead of navigating.
         e.preventDefault();
         e.stopPropagation();
         targetIndexRef.current = index;
         scrollTo(index);
-      } else if (index > 0) {
-        navigateToPhoto(index, selectedYear, selectedMonth);
+      } else {
+        // Focused: persist the scroll state, then let the card's <Link>
+        // navigate (its prefetch={true} resolves the photo ahead of click).
+        preparePhotoNavigation(index, selectedYear, selectedMonth);
       }
     },
-    [scrollTo, navigateToPhoto, selectedYear, selectedMonth]
+    [scrollTo, preparePhotoNavigation, selectedYear, selectedMonth]
   );
-
-  const handlePrev = useCallback(() => {
-    const nextIndex = Math.max(0, targetIndexRef.current - 1);
-    targetIndexRef.current = nextIndex;
-    scrollTo(nextIndex);
-  }, [scrollTo]);
-
-  const handleNext = useCallback(() => {
-    const nextIndex = Math.min(items.length - 1, targetIndexRef.current + 1);
-    targetIndexRef.current = nextIndex;
-    scrollTo(nextIndex);
-  }, [items.length, scrollTo]);
 
   const state: GalleryState = {
     p,
@@ -408,8 +396,6 @@ export function GalleryProvider({ photos, children }: { photos: PhotoProps[]; ch
     handleFilterChange,
     handleCardClick,
     setFilterExpanded,
-    handlePrev,
-    handleNext,
   };
 
   const meta: GalleryMeta = {

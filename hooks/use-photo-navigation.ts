@@ -1,36 +1,25 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { getPhotoHref } from "@/utils/photo-paths";
-import type { PhotoProps } from "@/utils/types";
-import type { Route } from 'next'
 
-export function usePhotoNavigation(photos: PhotoProps[]) {
-  const router = useRouter();
+/**
+ * Persists the gallery scroll position (index + active date filter) before a
+ * photo card navigates, so the gallery can restore it on the way back.
+ *
+ * Navigation itself goes through the card's <Link> (runtime prefetch via
+ * prefetch={true}); this hook only records the state the return trip needs.
+ */
+export function usePhotoNavigation() {
   const currentIndexRef = useRef(0);
 
-  const getPhotoHrefForIndex = useCallback(
-    (index: number): string | null => {
-      if (index < 0 || index >= photos.length) return null;
-      return getPhotoHref(photos[index].publicId);
-    },
-    [photos]
-  );
+  const onScrollUpdate = useCallback((p: number) => {
+    const roundedIndex = Math.round(p);
+    if (roundedIndex === currentIndexRef.current) return;
+    currentIndexRef.current = roundedIndex;
+  }, []);
 
-  const onScrollUpdate = useCallback(
-    (p: number) => {
-      const roundedIndex = Math.round(p);
-      if (roundedIndex === currentIndexRef.current) return;
-      currentIndexRef.current = roundedIndex;
-    },
-    []
-  );
-
-  const navigateToPhoto = useCallback(
+  const preparePhotoNavigation = useCallback(
     (index: number, year: string | null = null, month: number | null = null) => {
-      const href = getPhotoHrefForIndex(index);
-      if (!href) return;
       try {
         sessionStorage.setItem("galleryScrollIndex", String(index));
         if (year) {
@@ -47,10 +36,9 @@ export function usePhotoNavigation(photos: PhotoProps[]) {
       } catch {
         // sessionStorage may be unavailable in private browsing
       }
-      router.push(href as Route, { transitionTypes: ["nav-forward"] });
     },
-    [router, getPhotoHrefForIndex]
+    []
   );
 
-  return { navigateToPhoto, onScrollUpdate, getPhotoHrefForIndex };
+  return { onScrollUpdate, preparePhotoNavigation };
 }
