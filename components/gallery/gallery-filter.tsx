@@ -1,137 +1,179 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { ChevronDown, RotateCcw } from "lucide-react";
 import { useGalleryContext } from "@/components/gallery/gallery-provider";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export function GalleryFilter() {
   const { state, actions } = useGalleryContext();
-  const { selectedYear, selectedMonth, filterExpanded, years, months } = state;
+  const {
+    selectedYear,
+    selectedMonth,
+    filterExpanded,
+    years,
+    months,
+    items,
+  } = state;
   const { handleFilterChange, setFilterExpanded } = actions;
 
   const activeFilterLabel = useMemo(() => {
-    if (!selectedYear) return "All Memory";
+    if (!selectedYear) return "All memories";
     if (selectedMonth === null) return selectedYear;
     return `${MONTH_NAMES[selectedMonth]} ${selectedYear}`;
   }, [selectedYear, selectedMonth]);
 
+  useEffect(() => {
+    if (!filterExpanded) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setFilterExpanded(false);
+      }
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [filterExpanded, setFilterExpanded]);
+
+  const resetFilter = () => {
+    handleFilterChange(null, null);
+    setFilterExpanded(false);
+  };
+
   return (
-    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center pointer-events-auto select-none" style={{ viewTransitionName: "gallery-filter" }}>
-      {/* Toggle Pill */}
+    <div
+      className="fixed top-[4.75rem] left-1/2 z-50 flex -translate-x-1/2 flex-col items-center pointer-events-auto select-none sm:top-[5.5rem]"
+      style={{ viewTransitionName: "gallery-filter" }}
+    >
       <button
+        type="button"
         onClick={() => setFilterExpanded(!filterExpanded)}
-        className={`flex items-center gap-2.5 px-5 py-3 rounded-full bg-white/70 dark:bg-zinc-950/65 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/40 text-[10px] text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 hover:dark:text-white hover:bg-white/90 dark:hover:bg-zinc-900/80 transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] font-sans tracking-widest uppercase font-semibold focus:outline-none ${
-          filterExpanded ? "scale-[1.02] border-zinc-300 dark:border-zinc-700" : ""
+        aria-expanded={filterExpanded}
+        aria-haspopup="dialog"
+        className={`group flex items-center gap-3 rounded-full border px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] shadow-[0_8px_30px_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/60 dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] ${
+          filterExpanded
+            ? "border-zinc-400/60 bg-white/90 text-zinc-950 dark:border-zinc-600/70 dark:bg-zinc-900/90 dark:text-white"
+            : "border-zinc-200/50 bg-white/65 text-zinc-700 hover:border-zinc-300/70 hover:bg-white/90 dark:border-zinc-800/50 dark:bg-zinc-950/65 dark:text-zinc-300 dark:hover:border-zinc-700/70 dark:hover:bg-zinc-900/90"
         }`}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="10"
-          height="10"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={`transition-transform duration-300 ${filterExpanded ? "rotate-180" : ""}`}
-        >
-          <path d="m6 9 6 6 6-6"/>
-        </svg>
+        <span className="text-zinc-400 dark:text-zinc-500">Archive</span>
+        <span className="h-3 w-px bg-zinc-300/70 dark:bg-zinc-700/70" />
         <span>{activeFilterLabel}</span>
+        <ChevronDown size={13} className={`text-zinc-400 transition-transform duration-300 ${filterExpanded ? "rotate-180" : ""}`} />
       </button>
 
-      {/* Dropdown Menu */}
       {filterExpanded && (
-        <div className="absolute top-[calc(100%+8px)] flex flex-col gap-4 p-4 rounded-3xl bg-white/80 dark:bg-zinc-950/75 backdrop-blur-2xl border border-zinc-200/50 dark:border-zinc-800/45 shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.5)] min-w-[320px] max-w-[90vw] animate-in fade-in slide-in-from-top-3 duration-300 ease-out">
-          {/* Header */}
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-sans">
-              Filter by Date
-            </span>
-            <button
-              onClick={() => {
-                handleFilterChange(null, null);
-                setFilterExpanded(false);
-              }}
-              className="text-[9px] font-bold uppercase tracking-wider text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors cursor-pointer"
-            >
-              Reset
-            </button>
+        <div
+          role="dialog"
+          aria-label="Filter memories by date"
+          className="absolute top-[calc(100%+0.6rem)] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-zinc-200/60 bg-white/90 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.14)] backdrop-blur-2xl animate-in fade-in slide-in-from-top-2 duration-200 dark:border-zinc-800/60 dark:bg-zinc-950/90 dark:shadow-[0_28px_80px_rgba(0,0,0,0.55)]"
+        >
+          <div className="flex items-start justify-between border-b border-zinc-200/60 pb-3 dark:border-zinc-800/60">
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
+                Memory index
+              </p>
+              <p className="mt-1 text-sm font-medium tracking-tight text-zinc-950 dark:text-white">
+                {items.length} {items.length === 1 ? "memory" : "memories"}
+              </p>
+            </div>
+            {(selectedYear || selectedMonth !== null) && (
+              <button
+                type="button"
+                onClick={resetFilter}
+                className="flex items-center gap-1.5 rounded-full px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:hover:bg-zinc-900 dark:hover:text-white"
+              >
+                <RotateCcw size={11} /> Reset
+              </button>
+            )}
           </div>
 
-          {/* Year Section */}
-          <div className="flex flex-col gap-2">
-            <span className="text-[9px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 px-1">
+          <div className="mt-4">
+            <p className="mb-2 px-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-600">
               Year
-            </span>
+            </p>
             <div className="flex flex-wrap gap-1.5">
-              <button
-                onClick={() => handleFilterChange(null, null)}
-                className={`px-3.5 py-1.5 rounded-full text-[10px] font-bold font-mono tracking-wider transition-all duration-200 cursor-pointer ${
-                  selectedYear === null
-                    ? "bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 shadow-sm scale-105"
-                    : "bg-zinc-100/50 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/60"
-                }`}
-              >
-                ALL
-              </button>
+              <FilterOption active={selectedYear === null} onClick={() => handleFilterChange(null, null)}>
+                All
+              </FilterOption>
               {years.map((year) => (
-                <button
-                  key={year}
-                  onClick={() => handleFilterChange(year, null)}
-                  className={`px-3.5 py-1.5 rounded-full text-[10px] font-bold font-mono tracking-wider transition-all duration-200 cursor-pointer ${
-                    selectedYear === year
-                      ? "bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 shadow-sm scale-105"
-                      : "bg-zinc-100/50 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/60"
-                  }`}
-                >
+                <FilterOption key={year} active={selectedYear === year} onClick={() => handleFilterChange(year, null)}>
                   {year}
-                </button>
+                </FilterOption>
               ))}
             </div>
           </div>
 
-          {/* Month Section */}
-          <div className={`flex flex-col gap-2 transition-all duration-300 ${selectedYear ? "opacity-100 max-h-48" : "opacity-0 max-h-0 overflow-hidden pointer-events-none"}`}>
-            <span className="text-[9px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 px-1 border-t border-zinc-150/40 dark:border-zinc-800/40 pt-3">
-              Month
-            </span>
-            <div className="grid grid-cols-4 gap-1.5 pt-0.5">
-              <button
-                onClick={() => handleFilterChange(selectedYear, null)}
-                className={`col-span-4 py-1.5 rounded-lg text-[9px] uppercase font-bold font-mono tracking-wider transition-all duration-200 cursor-pointer text-center ${
-                  selectedMonth === null
-                    ? "bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 shadow-sm"
-                    : "bg-zinc-100/50 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/60"
-                }`}
-              >
-                ALL MONTHS
-              </button>
-              {MONTH_NAMES.map((name, index) => {
-                const isAvailable = months.includes(index);
-                return (
-                  <button
-                    key={name}
-                    disabled={!isAvailable}
-                    onClick={() => handleFilterChange(selectedYear, index)}
-                    className={`py-1.5 rounded-lg text-[9px] font-bold font-mono tracking-wider transition-all duration-200 cursor-pointer text-center ${
-                      !isAvailable
-                        ? "opacity-20 cursor-not-allowed text-zinc-400 dark:text-zinc-650"
-                        : selectedMonth === index
-                        ? "bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 shadow-sm scale-105"
-                        : "bg-zinc-100/50 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/60"
-                    }`}
-                  >
-                    {name}
-                  </button>
-                );
-              })}
+          {selectedYear && (
+            <div className="mt-4 border-t border-zinc-200/60 pt-4 dark:border-zinc-800/60">
+              <p className="mb-2 px-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-600">
+                {selectedYear} / Month
+              </p>
+              <div className="grid grid-cols-4 gap-1.5">
+                <FilterOption
+                  className="col-span-4"
+                  active={selectedMonth === null}
+                  onClick={() => {
+                    handleFilterChange(selectedYear, null);
+                    setFilterExpanded(false);
+                  }}
+                >
+                  All months
+                </FilterOption>
+                {MONTH_NAMES.map((name, index) => {
+                  const available = months.includes(index);
+                  return (
+                    <FilterOption
+                      key={name}
+                      disabled={!available}
+                      active={selectedMonth === index}
+                      onClick={() => {
+                        handleFilterChange(selectedYear, index);
+                        setFilterExpanded(false);
+                      }}
+                    >
+                      {name}
+                    </FilterOption>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>
+  );
+}
+
+function FilterOption({
+  active,
+  disabled = false,
+  className = "",
+  onClick,
+  children,
+}: {
+  active: boolean;
+  disabled?: boolean;
+  className?: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`rounded-lg px-3 py-2 text-[10px] font-mono tracking-wider transition-all duration-200 ${className} ${
+        disabled
+          ? "cursor-not-allowed opacity-20"
+          : active
+            ? "bg-zinc-950 text-white shadow-sm dark:bg-white dark:text-zinc-950"
+            : "bg-zinc-100/70 text-zinc-600 hover:bg-zinc-200/80 hover:text-zinc-950 dark:bg-zinc-900/70 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

@@ -3,7 +3,6 @@
 import type { PhotoProps } from "@/utils/types";
 import { GalleryProvider, CARD_SPACING_PX } from "@/components/gallery/gallery-provider";
 import { useGalleryContext } from "@/components/gallery/gallery-provider";
-import { FilmstripGallery } from "@/features/gallery/components/filmstrip-gallery";
 import { OverviewGallery } from "@/features/gallery/components/overview-gallery";
 import { GalleryCard } from "./gallery-card";
 import { GalleryFilter } from "./gallery-filter";
@@ -65,12 +64,6 @@ function GalleryInner(): React.JSX.Element {
               />
             );
           })}
-        </div>
-      )}
-
-      {viewMode === "filmstrip" && (
-        <div className="min-h-dvh w-full bg-radial from-[#ffffff] to-[#e4e4e7] dark:from-[#1b1b1f] dark:to-[#09090b]">
-          <FilmstripGallery />
         </div>
       )}
 

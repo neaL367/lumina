@@ -3,41 +3,56 @@ import Link from "next/link";
 
 export function GalleryHeader() {
   return (
-    <div className="fixed top-6 left-6 right-6 z-50 flex items-center justify-between" style={{ viewTransitionName: "gallery-header" }}>
-      <Link
-        href="/"
-        className="flex items-center gap-3 px-5 py-3 rounded-full bg-white/70 dark:bg-zinc-950/65 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/40 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] select-none"
+    <header
+      className="fixed top-4 left-4 right-4 z-50 sm:top-5 sm:left-6 sm:right-6"
+      style={{ viewTransitionName: "gallery-header" }}
+    >
+      <nav
+        aria-label="Primary navigation"
+        className="mx-auto flex max-w-[1600px] items-center justify-between rounded-2xl border border-zinc-200/50 bg-white/65 px-3 py-2.5 shadow-[0_10px_35px_rgba(0,0,0,0.06)] backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/65 dark:shadow-[0_12px_40px_rgba(0,0,0,0.32)]"
       >
-        <span className="flex flex-col tracking-tight leading-none">
-          <span className="text-zinc-500 dark:text-zinc-400 text-[9px] font-medium tracking-[0.15em] uppercase">
-            Neal367&apos;s
+        <Link
+          href="/"
+          className="group flex items-center gap-3 rounded-xl px-2 py-1.5 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/60"
+          aria-label="Neal367's Photography home"
+        >
+          <span className="flex size-7 items-center justify-center rounded-lg bg-zinc-950 text-[10px] font-semibold tracking-tight text-white transition-transform duration-300 group-hover:rotate-3 dark:bg-white dark:text-zinc-950">
+            N
           </span>
-          <span className="text-zinc-900 dark:text-white text-sm font-normal leading-[1.2]">
-            Photography
+          <span className="flex flex-col leading-none">
+            <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+              Neal367&apos;s
+            </span>
+            <span className="mt-1 text-sm font-medium tracking-tight text-zinc-950 dark:text-white">
+              Photography
+            </span>
           </span>
-        </span>
-      </Link>
+        </Link>
 
-      <div className="flex items-center gap-2">
-        <a
-          href="https://github.com/neal367"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-3 rounded-full bg-white/70 dark:bg-zinc-950/65 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/40 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-white/90 dark:hover:bg-zinc-900/80 transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
-          aria-label="GitHub"
-        >
-          <Github size={14} />
-        </a>
-        <a
-          href="https://twitter.com/NL367"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-3 rounded-full bg-white/70 dark:bg-zinc-950/65 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/40 text-zinc-500 dark:text-zinc-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-white/90 dark:hover:bg-zinc-900/80 transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
-          aria-label="Twitter"
-        >
-          <Twitter size={14} />
-        </a>
-      </div>
-    </div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className="mr-2 hidden text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-400 lg:inline">
+            Visual archive
+          </span>
+          <a
+            href="https://github.com/neal367"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex size-8 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-white"
+            aria-label="GitHub"
+          >
+            <Github size={14} />
+          </a>
+          <a
+            href="https://twitter.com/NL367"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex size-8 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-blue-500 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-blue-400"
+            aria-label="Twitter"
+          >
+            <Twitter size={14} />
+          </a>
+        </div>
+      </nav>
+    </header>
   );
 }
