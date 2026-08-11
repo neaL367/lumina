@@ -60,6 +60,7 @@ function PhotoImage({ photo }: { photo: PhotoProps }) {
         <ViewTransition
           name={`photo-${getPhotoRoutePath(photo.publicId)}`}
           share="photo-morph"
+          default="none"
         >
           <div
             className={`relative overflow-hidden w-full sm:rounded-3xl rounded-none border-y sm:border border-zinc-200/20 dark:border-zinc-800/35 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.22)] dark:shadow-[0_35px_80px_-15px_rgba(0,0,0,0.65)] ${

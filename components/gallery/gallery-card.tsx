@@ -67,7 +67,12 @@ export function GalleryCard(
   };
 
   return (
-    <ViewTransition key={key} name={`photo-${token}`} share="photo-morph">
+    <ViewTransition
+      key={key}
+      name={`photo-${token}`}
+      share="photo-morph"
+      default="none"
+    >
       <div
         key={key}
         data-key={key}

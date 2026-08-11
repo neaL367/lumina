@@ -1,7 +1,5 @@
 "use client";
 
-import { ViewTransition } from "react";
-
 function CardSkeleton({ className = "" }: { className?: string }) {
   return (
     <div className={`relative rounded-3xl bg-zinc-200/60 dark:bg-zinc-800/60 animate-pulse ${className}`} />
@@ -62,11 +60,9 @@ export function PhotoSkeleton() {
   return (
     <div className="w-full min-h-dvh bg-[#f3f3f3] dark:bg-zinc-950 flex items-center justify-center sm:p-6">
       <div className="relative w-full max-w-5xl mx-auto">
-        <ViewTransition share="photo-morph">
-          <div className="relative w-full aspect-[3/2] overflow-hidden sm:rounded-3xl rounded-none bg-zinc-200/60 dark:bg-zinc-800/60 p-1.5 sm:p-2 animate-pulse">
-            <div className="w-full h-full rounded-2xl" />
-          </div>
-        </ViewTransition>
+        <div className="relative w-full aspect-[3/2] overflow-hidden sm:rounded-3xl rounded-none bg-zinc-200/60 dark:bg-zinc-800/60 p-1.5 sm:p-2 animate-pulse">
+          <div className="w-full h-full rounded-2xl" />
+        </div>
       </div>
     </div>
   );
