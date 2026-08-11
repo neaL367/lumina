@@ -59,19 +59,11 @@ export function GalleryProgress() {
 
   return (
     <div
-      className="fixed bottom-7 left-5 right-5 z-40 flex items-center justify-center text-zinc-500 dark:text-zinc-400 select-none pointer-events-none sm:bottom-8"
-      style={{ bottom: "calc(1.75rem + env(safe-area-inset-bottom))" }}
+      className="pointer-events-none fixed bottom-6 left-5 right-5 z-40 flex justify-center text-zinc-500 dark:text-zinc-400 select-none sm:bottom-7"
+      style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
     >
-      <div className="flex w-full max-w-2xl items-end gap-4 pointer-events-auto" style={{ viewTransitionName: "gallery-progress" }}>
-        <div className="shrink-0 font-mono text-xs text-zinc-700 dark:text-zinc-300">
-          <span className="font-medium text-zinc-950 dark:text-white">
-            {String(currentIndex + 1).padStart(2, "0")}
-          </span>
-          <span className="mx-1.5 text-zinc-400">/</span>
-          <span>{String(items.length).padStart(2, "0")}</span>
-        </div>
-
-        <div className="relative flex-1 pb-1">
+      <div className="pointer-events-auto w-[min(90vw,42rem)]" style={{ viewTransitionName: "gallery-progress" }}>
+        <div className="relative px-1 pb-1">
           <div className="absolute -top-4 left-0 right-0 hidden h-3 sm:block" aria-hidden="true">
             {dateMarkers.map((marker) => (
               <span
@@ -110,15 +102,23 @@ export function GalleryProgress() {
                   event.stopPropagation();
                   actions.selectPhoto(marker.index);
                 }}
-                className="absolute left-0 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-400 transition-all hover:size-2 hover:bg-zinc-950 dark:bg-zinc-600 dark:hover:bg-white"
+                className="absolute left-0 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-400 transition-[width,height,background-color] duration-150 hover:size-2 hover:bg-zinc-950 dark:bg-zinc-600 dark:hover:bg-white"
                 style={{ left: `${marker.position}%` }}
               />
             ))}
             <div
-              className="absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-950 shadow-[0_0_0_2px_rgba(243,243,243,0.9)] transition-[left] duration-100 dark:bg-white dark:shadow-[0_0_0_2px_rgba(9,9,11,0.9)]"
+              className="absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-950 shadow-[0_0_0_2px_rgba(243,243,243,0.9)] will-change-[left] dark:bg-white dark:shadow-[0_0_0_2px_rgba(9,9,11,0.9)]"
               style={{ left: `${progress}%` }}
             />
           </div>
+        </div>
+
+        <div className="flex items-center justify-center gap-2 font-mono text-[11px] tracking-[0.16em] text-zinc-500 dark:text-zinc-500">
+          <span className="font-medium text-zinc-950 dark:text-white">
+            {String(currentIndex + 1).padStart(2, "0")}
+          </span>
+          <span className="text-zinc-400">/</span>
+          <span>{String(items.length).padStart(2, "0")}</span>
         </div>
       </div>
     </div>
