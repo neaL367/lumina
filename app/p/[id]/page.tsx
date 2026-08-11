@@ -7,7 +7,7 @@ import {
 
 export default function PhotoPage({ params }: PageProps<"/p/[id]">) {
   return (
-    <div className="w-full min-h-dvh bg-[#f3f3f3] dark:bg-zinc-950 flex items-center justify-center sm:p-6 relative">
+    <div className="w-full min-h-dvh bg-[#f3f3f3] pt-16 dark:bg-zinc-950 flex items-center justify-center sm:p-6 relative">
       <PhotoNav />
       <ViewTransition
         enter={{

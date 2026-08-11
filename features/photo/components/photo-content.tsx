@@ -39,12 +39,12 @@ function PhotoImage({ photo }: { photo: PhotoProps }): React.JSX.Element {
 
   return (
     <>
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed top-3 right-4 z-[51] sm:right-6">
         <a
           href={fullImageUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="gallery-glass-surface gallery-glass-control flex size-11 items-center justify-center rounded-2xl"
+          className="gallery-glass-control flex size-10 items-center justify-center rounded-xl"
           aria-label="Open full resolution image in new tab"
         >
           <ExternalLink size={18} />

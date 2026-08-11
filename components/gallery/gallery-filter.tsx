@@ -55,10 +55,10 @@ export function GalleryFilter() {
         onClick={() => setFilterExpanded(!filterExpanded)}
         aria-expanded={filterExpanded}
         aria-haspopup="dialog"
-        className={`gallery-glass-surface gallery-glass-control group flex items-center gap-3 rounded-full border px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/60 ${
+        className={`gallery-glass-control group flex items-center gap-3 border-b-2 px-1 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/60 ${
           filterExpanded
-            ? "border-zinc-400/60 bg-white/90 text-zinc-950 dark:border-zinc-600/70 dark:bg-zinc-900/90 dark:text-white"
-            : "border-zinc-200/50 bg-white/65 text-zinc-700 hover:border-zinc-300/70 hover:bg-white/90 dark:border-zinc-800/50 dark:bg-zinc-950/65 dark:text-zinc-300 dark:hover:border-zinc-700/70 dark:hover:bg-zinc-900/90"
+            ? "border-zinc-950 text-zinc-950 dark:border-white dark:text-white"
+            : "border-transparent text-zinc-600 dark:text-zinc-300"
         }`}
       >
         <span className="text-zinc-400 dark:text-zinc-500">Collection</span>
@@ -71,7 +71,7 @@ export function GalleryFilter() {
         <div
           role="dialog"
           aria-label="Filter memories by date"
-          className="gallery-glass-surface absolute top-[calc(100%+0.6rem)] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-3xl p-4 animate-in fade-in slide-in-from-top-2 duration-200"
+          className="gallery-glass-surface absolute right-0 top-[calc(100%+0.6rem)] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-3xl p-4 animate-in fade-in slide-in-from-top-2 duration-200"
         >
           <div className="flex items-start justify-between border-b border-zinc-200/60 pb-3 dark:border-zinc-800/60">
             <div>
