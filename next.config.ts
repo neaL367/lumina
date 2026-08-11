@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
+  partialPrefetching: true,
   typedRoutes: true,
   cacheLife: {
     gallery: {
@@ -26,7 +27,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     inlineCss: true,
-    viewTransition: true,
+    // TypeScript 7 has no JS compiler API and no typescript-eslint support yet.
+    // Pinned to TS 6; CLI checker (default) keeps next build/typegen working.
+    useTypeScriptCli: true,
     optimizePackageImports: ["lucide-react"],
   },
   images: {

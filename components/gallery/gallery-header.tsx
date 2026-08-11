@@ -1,9 +1,10 @@
 import { Github, Twitter } from "lucide-react";
+import Link from "next/link";
 
 export function GalleryHeader() {
   return (
     <div className="fixed top-6 left-6 right-6 z-50 flex items-center justify-between" style={{ viewTransitionName: "gallery-header" }}>
-      <a
+      <Link
         href="/"
         className="flex items-center gap-3 px-5 py-3 rounded-full bg-white/70 dark:bg-zinc-950/65 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/40 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] select-none"
       >
@@ -15,7 +16,7 @@ export function GalleryHeader() {
             Photography
           </span>
         </span>
-      </a>
+      </Link>
 
       <div className="flex items-center gap-2">
         <a
