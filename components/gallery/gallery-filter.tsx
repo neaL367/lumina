@@ -61,7 +61,7 @@ export function GalleryFilter() {
             : "border-zinc-200/50 bg-white/65 text-zinc-700 hover:border-zinc-300/70 hover:bg-white/90 dark:border-zinc-800/50 dark:bg-zinc-950/65 dark:text-zinc-300 dark:hover:border-zinc-700/70 dark:hover:bg-zinc-900/90"
         }`}
       >
-        <span className="text-zinc-400 dark:text-zinc-500">Archive</span>
+        <span className="text-zinc-400 dark:text-zinc-500">Collection</span>
         <span className="h-3 w-px bg-zinc-300/70 dark:bg-zinc-700/70" />
         <span>{activeFilterLabel}</span>
         <ChevronDown size={13} className={`text-zinc-400 transition-transform duration-300 ${filterExpanded ? "rotate-180" : ""}`} />
