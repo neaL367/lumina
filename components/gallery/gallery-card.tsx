@@ -90,7 +90,6 @@ export function GalleryCard(
           href={getPhotoHref(item.photo.publicId)}
           prefetch={true}
           scroll={false}
-          data-gallery-card="true"
           onClick={(e) => actions.handleCardClick(e, index)}
           onKeyDown={handleCardKeyDown}
           className="block w-full h-full cursor-pointer focus:outline-none"

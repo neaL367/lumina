@@ -30,11 +30,6 @@ async function PhotoContent({ id }: { id: string }) {
   return <PhotoImage photo={photo} />;
 }
 
-async function PhotoContentWrapper({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  return <PhotoContent id={id} />;
-}
-
 function PhotoImage({ photo }: { photo: PhotoProps }) {
   const isLandscape = photo.width > photo.height;
   const assetPath = getCloudinaryAssetPath(photo.publicId, photo.format);
@@ -75,16 +70,12 @@ function PhotoImage({ photo }: { photo: PhotoProps }) {
   );
 }
 
-export default function PhotoPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function PhotoPage({ params }: PageProps<"/p/[id]">) {
   return (
     <div className="w-full min-h-dvh bg-[#f3f3f3] dark:bg-zinc-950 flex items-center justify-center sm:p-6 relative">
       <PhotoNav />
       <Suspense fallback={<PhotoSkeleton />}>
-        <PhotoContentWrapper params={params} />
+        {params.then(({ id }) => <PhotoContent id={id} />)}
       </Suspense>
     </div>
   );
